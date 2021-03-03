@@ -3,81 +3,84 @@
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
+from copy import copy
 from urllib.parse import parse_qs, urlparse
 
-from keycloak.exceptions import KeycloakAuthenticationError, KeycloakConnectionError
+from keycloak.exceptions import KeycloakError
 import pytest
 
-from .sample_data import OIDC_PROFILE, USER_INFO, WELL_KNOWN
+from swh.auth.tests.conftest import keycloak_mock_factory
+from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, USER_INFO
+
+# dataset we have here is bound to swh-web
+keycloak_mock = keycloak_mock_factory(client_id=CLIENT_ID)
 
 
-def test_auth_connection_failure(keycloak_open_id_connect):
-    with pytest.raises(KeycloakConnectionError):
-        keycloak_open_id_connect.well_known()
+def test_auth_well_known(keycloak_mock):
+    well_known_result = keycloak_mock.well_known()
+    assert set(well_known_result.keys()) == {
+        "issuer",
+        "authorization_endpoint",
+        "token_endpoint",
+        "userinfo_endpoint",
+        "end_session_endpoint",
+        "jwks_uri",
+        "token_introspection_endpoint",
+    }
 
 
-def test_auth_well_known(mock_keycloak, keycloak_open_id_connect):
-    well_known_result = keycloak_open_id_connect.well_known()
-    assert well_known_result is not None
-    assert well_known_result == WELL_KNOWN
+def test_auth_authorization_url(keycloak_mock):
+    actual_auth_uri = keycloak_mock.authorization_url("http://redirect-uri", foo="bar")
 
-    assert mock_keycloak.called
-
-
-def test_auth_authorization_url(mock_keycloak, keycloak_open_id_connect):
-    actual_auth_uri = keycloak_open_id_connect.authorization_url(
-        "http://redirect-uri", foo="bar"
-    )
-
-    expected_auth_url = WELL_KNOWN["authorization_endpoint"]
+    expected_auth_url = keycloak_mock.well_known()["authorization_endpoint"]
     parsed_result = urlparse(actual_auth_uri)
     assert expected_auth_url.endswith(parsed_result.path)
 
     parsed_query = parse_qs(parsed_result.query)
     assert parsed_query == {
-        "client_id": ["client-id"],
+        "client_id": [CLIENT_ID],
         "response_type": ["code"],
         "redirect_uri": ["http://redirect-uri"],
         "foo": ["bar"],
     }
 
-    assert mock_keycloak.called
+
+def test_auth_authorization_code_fail(keycloak_mock):
+    "Authorization failure raise error"
+    # Simulate failed authentication with Keycloak
+    keycloak_mock.set_auth_success(False)
+
+    with pytest.raises(KeycloakError):
+        keycloak_mock.authorization_code("auth-code", "redirect-uri")
 
 
-def test_auth_authorization_code_fail(
-    mock_keycloak_refused_auth, keycloak_open_id_connect
-):
-    with pytest.raises(KeycloakAuthenticationError):
-        keycloak_open_id_connect.authorization_code("auth-code", "redirect-uri")
-
-    assert mock_keycloak_refused_auth.called
-
-
-def test_auth_authorization_code(mock_keycloak, keycloak_open_id_connect):
-    actual_response = keycloak_open_id_connect.authorization_code(
-        "auth-code", "redirect-uri"
-    )
-
+def test_auth_authorization_code(keycloak_mock):
+    actual_response = keycloak_mock.authorization_code("auth-code", "redirect-uri")
     assert actual_response == OIDC_PROFILE
 
-    assert mock_keycloak.called
+
+def test_auth_refresh_token(keycloak_mock):
+    actual_result = keycloak_mock.refresh_token("refresh-token")
+    assert actual_result == OIDC_PROFILE
 
 
-def test_auth_refresh_token(mock_keycloak, keycloak_open_id_connect):
-    actual_result = keycloak_open_id_connect.refresh_token("refresh-token")
-    assert actual_result is not None
-
-    assert mock_keycloak.called
-
-
-def test_auth_userinfo(mock_keycloak, keycloak_open_id_connect):
-    actual_user_info = keycloak_open_id_connect.userinfo("refresh-token")
+def test_auth_userinfo(keycloak_mock):
+    actual_user_info = keycloak_mock.userinfo("refresh-token")
     assert actual_user_info == USER_INFO
 
-    assert mock_keycloak.called
+
+def test_auth_logout(keycloak_mock):
+    """Login out does not raise"""
+    keycloak_mock.logout("refresh-token")
 
 
-def test_auth_logout(mock_keycloak, keycloak_open_id_connect):
-    keycloak_open_id_connect.logout("refresh-token")
+def test_auth_decode_token(keycloak_mock):
+    actual_decoded_data = keycloak_mock.decode_token(OIDC_PROFILE["access_token"])
 
-    assert mock_keycloak.called
+    actual_decoded_data2 = copy(actual_decoded_data)
+    expected_decoded_token = copy(DECODED_TOKEN)
+    for dynamic_valued_key in ["exp", "auth_time"]:
+        actual_decoded_data2.pop(dynamic_valued_key)
+        expected_decoded_token.pop(dynamic_valued_key)
+
+    assert actual_decoded_data2 == expected_decoded_token

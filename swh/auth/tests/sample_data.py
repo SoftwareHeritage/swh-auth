@@ -5,198 +5,40 @@
 
 SERVER_URL = "http://keycloak:8080/keycloak/auth/"
 REALM = "SoftwareHeritage"
+CLIENT_ID = "swh-web"
 
-WELL_KNOWN = {
-    "issuer": f"{SERVER_URL}realms/SoftwareHeritage",
-    "well-known": f"{SERVER_URL}realms/{REALM}/.well-known/openid-configuration",
-    "authorization_endpoint": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect/auth",  # noqa
-    "token_endpoint": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect/token",
-    "introspection_endpoint": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect/token/introspect",  # noqa
-    "userinfo_endpoint": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect/userinfo",
-    "end_session_endpoint": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect/logout",  # noqa
-    "jwks_uri": "{SERVER_URL}realms/{REALM}/protocol/openid-connect/certs",
-    "check_session_iframe": "{SERVER_URL}realms/{REALM}/protocol/openid-connect/login-status-iframe.html",  # noqa
-    "grant_types_supported": [
-        "authorization_code",
-        "implicit",
-        "refresh_token",
-        "password",
-        "client_credentials",
-    ],
-    "response_types_supported": [
-        "code",
-        "none",
-        "id_token",
-        "token",
-        "id_token token",
-        "code id_token",
-        "code token",
-        "code id_token token",
-    ],
-    "subject_types_supported": ["public", "pairwise"],
-    "id_token_signing_alg_values_supported": [
-        "PS384",
-        "ES384",
-        "RS384",
-        "HS256",
-        "HS512",
-        "ES256",
-        "RS256",
-        "HS384",
-        "ES512",
-        "PS256",
-        "PS512",
-        "RS512",
-    ],
-    "id_token_encryption_alg_values_supported": ["RSA-OAEP", "RSA-OAEP-256", "RSA1_5"],
-    "id_token_encryption_enc_values_supported": [
-        "A256GCM",
-        "A192GCM",
-        "A128GCM",
-        "A128CBC-HS256",
-        "A192CBC-HS384",
-        "A256CBC-HS512",
-    ],
-    "userinfo_signing_alg_values_supported": [
-        "PS384",
-        "ES384",
-        "RS384",
-        "HS256",
-        "HS512",
-        "ES256",
-        "RS256",
-        "HS384",
-        "ES512",
-        "PS256",
-        "PS512",
-        "RS512",
-        "none",
-    ],
-    "request_object_signing_alg_values_supported": [
-        "PS384",
-        "ES384",
-        "RS384",
-        "HS256",
-        "HS512",
-        "ES256",
-        "RS256",
-        "HS384",
-        "ES512",
-        "PS256",
-        "PS512",
-        "RS512",
-        "none",
-    ],
-    "response_modes_supported": ["query", "fragment", "form_post"],
-    "registration_endpoint": "{SERVER_URL}realms/{REALM}/clients-registrations/openid-connect",  # noqa
-    "token_endpoint_auth_methods_supported": [
-        "private_key_jwt",
-        "client_secret_basic",
-        "client_secret_post",
-        "tls_client_auth",
-        "client_secret_jwt",
-    ],
-    "token_endpoint_auth_signing_alg_values_supported": [
-        "PS384",
-        "ES384",
-        "RS384",
-        "HS256",
-        "HS512",
-        "ES256",
-        "RS256",
-        "HS384",
-        "ES512",
-        "PS256",
-        "PS512",
-        "RS512",
-    ],
-    "claims_supported": [
-        "aud",
-        "sub",
-        "iss",
-        "auth_time",
-        "name",
-        "given_name",
-        "family_name",
-        "preferred_username",
-        "email",
-        "acr",
-    ],
-    "claim_types_supported": ["normal"],
-    "claims_parameter_supported": True,
-    "scopes_supported": [
-        "openid",
-        "microprofile-jwt",
-        "web-origins",
-        "roles",
-        "phone",
-        "address",
-        "email",
-        "profile",
-        "offline_access",
-    ],
-    "request_parameter_supported": True,
-    "request_uri_parameter_supported": True,
-    "require_request_uri_registration": True,
-    "code_challenge_methods_supported": ["plain", "S256"],
-    "tls_client_certificate_bound_access_tokens": True,
-    "revocation_endpoint": "{SERVER_URL}realms/{REALM}/protocol/openid-connect/revoke",
-    "revocation_endpoint_auth_methods_supported": [
-        "private_key_jwt",
-        "client_secret_basic",
-        "client_secret_post",
-        "tls_client_auth",
-        "client_secret_jwt",
-    ],
-    "revocation_endpoint_auth_signing_alg_values_supported": [
-        "PS384",
-        "ES384",
-        "RS384",
-        "HS256",
-        "HS512",
-        "ES256",
-        "RS256",
-        "HS384",
-        "ES512",
-        "PS256",
-        "PS512",
-        "RS512",
-    ],
-    "backchannel_logout_supported": True,
-    "backchannel_logout_session_supported": True,
+# Decoded token (out of the access token)
+DECODED_TOKEN = {
+    "jti": "31fc50b7-bbe5-4f51-91ef-8e3eec51331e",
+    "exp": 1614787019,
+    "nbf": 0,
+    "iat": 1582723101,
+    "iss": "http://localhost:8080/auth/realms/SoftwareHeritage",
+    "aud": [CLIENT_ID, "account"],
+    "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
+    "typ": "Bearer",
+    "azp": CLIENT_ID,
+    "auth_time": 1614786418,
+    "session_state": "d82b90d1-0a94-4e74-ad66-dd95341c7b6d",
+    "acr": "1",
+    "allowed-origins": ["*"],
+    "realm_access": {"roles": ["offline_access", "uma_authorization"]},
+    "resource_access": {
+        "account": {"roles": ["manage-account", "manage-account-links", "view-profile"]}
+    },
+    "scope": "openid email profile",
+    "email_verified": False,
+    "name": "John Doe",
+    "groups": [],
+    "preferred_username": "johndoe",
+    "given_name": "John",
+    "family_name": "Doe",
+    "email": "john.doe@example.com",
 }
-
 
 # Authentication response is an oidc profile dict
 OIDC_PROFILE = {
     "access_token": (
-        # decoded token:
-        # {'acr': '1',
-        #  'allowed-origins': ['*'],
-        #  'aud': ['swh-web', 'account'],
-        #  'auth_time': 1592395601,
-        #  'azp': 'swh-web',
-        #  'email': 'john.doe@example.com',
-        #  'email_verified': False,
-        #  'exp': 1592396202,
-        #  'family_name': 'Doe',
-        #  'given_name': 'John',
-        #  'groups': ['/staff'],
-        #  'iat': 1582723101,
-        #  'iss': 'http://localhost:8080/auth/realms/SoftwareHeritage',
-        #  'jti': '31fc50b7-bbe5-4f51-91ef-8e3eec51331e',
-        #  'name': 'John Doe',
-        #  'nbf': 0,
-        #  'preferred_username': 'johndoe',
-        #  'realm_access': {'roles': ['offline_access', 'uma_authorization']},
-        #  'resource_access': {'account': {'roles': ['manage-account',
-        #                                            'manage-account-links',
-        #                                            'view-profile']}},
-        #  'scope': 'openid email profile',
-        #  'session_state': 'd82b90d1-0a94-4e74-ad66-dd95341c7b6d',
-        #  'sub': 'feacd344-b468-4a65-a236-14f61e6b7200',
-        #  'typ': 'Bearer'
-        #  }
         "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJPSnhV"
         "Q0p0TmJQT0NOUGFNNmc3ZU1zY2pqTXhoem9vNGxZaFhsa1c2TWhBIn0."
         "eyJqdGkiOiIzMWZjNTBiNy1iYmU1LTRmNTEtOTFlZi04ZTNlZWM1MTMz"
@@ -271,7 +113,6 @@ OIDC_PROFILE = {
     "token_type": "bearer",
 }
 
-
 USER_INFO = {
     "email": "john.doe@example.com",
     "email_verified": False,
@@ -281,4 +122,21 @@ USER_INFO = {
     "name": "John Doe",
     "preferred_username": "johndoe",
     "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
+}
+
+RAW_REALM_PUBLIC_KEY = (
+    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnqF4xvGjaI54P6WtJvyGayxP8A93u"
+    "NcA3TH6jitwmyAalj8dN8/NzK9vrdlSA3Ibvp/XQujPSOP7a35YiYFscEJnogTXQpE/FhZrUY"
+    "y21U6ezruVUv4z/ER1cYLb+q5ZI86nXSTNCAbH+lw7rQjlvcJ9KvgHEeA5ALXJ1r55zUmNvuy"
+    "5o6ke1G3fXbNSXwF4qlWAzo1o7Ms8qNrNyOG8FPx24dvm9xMH7/08IPvh9KUqlnP8h6olpxHr"
+    "drX/q4E+Nzj8Tr8p7Z5CimInls40QuOTIhs6C2SwFHUgQgXl9hB9umiZJlwYEpDv0/LO2zYie"
+    "Hl5Lv7Iig4FOIXIVCaDGQIDAQAB"
+)
+
+REALM_PUBLIC_KEY = {
+    "realm": REALM,
+    "public_key": RAW_REALM_PUBLIC_KEY,
+    "token-service": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect",
+    "account-service": f"{SERVER_URL}realms/{REALM}/account",
+    "tokens-not-before": 0,
 }
