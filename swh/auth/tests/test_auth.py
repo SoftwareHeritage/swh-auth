@@ -75,3 +75,9 @@ def test_auth_userinfo(mock_keycloak, keycloak_open_id_connect):
     assert actual_user_info == USER_INFO
 
     assert mock_keycloak.called
+
+
+def test_auth_logout(mock_keycloak, keycloak_open_id_connect):
+    keycloak_open_id_connect.logout("refresh-token")
+
+    assert mock_keycloak.called

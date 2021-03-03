@@ -25,6 +25,7 @@ def mock_keycloak(requests_mock):
     requests_mock.get(WELL_KNOWN["well-known"], json=WELL_KNOWN)
     requests_mock.post(WELL_KNOWN["token_endpoint"], json=OIDC_PROFILE)
     requests_mock.get(WELL_KNOWN["userinfo_endpoint"], json=USER_INFO)
+    requests_mock.post(WELL_KNOWN["end_session_endpoint"], status_code=204)
 
     return requests_mock
 
