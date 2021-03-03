@@ -39,14 +39,14 @@ def parse_requirements(name=None):
 # Full sample:
 #   https://forge.softwareheritage.org/diffusion/DCORE/browse/master/setup.py
 setup(
-    name="swh.<module-name>",  # example: swh.loader.pypi
-    description="Software Heritage <Module's intent>",
+    name="swh.auth",
+    description="Software Heritage Authentication",
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires=">=3.7",
     author="Software Heritage developers",
     author_email="swh-devel@inria.fr",
-    url="https://forge.softwareheritage.org/diffusion/<module-git-code>",
+    url="https://forge.softwareheritage.org/source/swh-auth/",
     packages=find_packages(),  # packages's modules
     install_requires=parse_requirements() + parse_requirements("swh"),
     tests_require=parse_requirements("test"),
@@ -54,10 +54,10 @@ setup(
     use_scm_version=True,
     extras_require={"testing": parse_requirements("test")},
     include_package_data=True,
-    entry_points="""
-        [swh.cli.subcommands]
-        <cli-name>=swh.<module>.cli
-    """,
+    # entry_points="""
+    #     [swh.cli.subcommands]
+    #     <cli-name>=swh.<module>.cli
+    # """,
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Developers",

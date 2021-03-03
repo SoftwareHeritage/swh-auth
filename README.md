@@ -1,5 +1,5 @@
-swh-py-template
-===============
+swh-auth
+==========
 
-Python module template, used as skeleton to create new modules.
+Authentication library for SWH (keycloak common utilities)
 
