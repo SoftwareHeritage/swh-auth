@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlparse
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakConnectionError
 import pytest
 
-from .sample_data import OIDC_PROFILE, WELL_KNOWN
+from .sample_data import OIDC_PROFILE, USER_INFO, WELL_KNOWN
 
 
 def test_auth_connection_failure(keycloak_open_id_connect):
@@ -66,5 +66,12 @@ def test_auth_authorization_code(mock_keycloak, keycloak_open_id_connect):
 def test_auth_refresh_token(mock_keycloak, keycloak_open_id_connect):
     actual_result = keycloak_open_id_connect.refresh_token("refresh-token")
     assert actual_result is not None
+
+    assert mock_keycloak.called
+
+
+def test_auth_userinfo(mock_keycloak, keycloak_open_id_connect):
+    actual_user_info = keycloak_open_id_connect.userinfo("refresh-token")
+    assert actual_user_info == USER_INFO
 
     assert mock_keycloak.called

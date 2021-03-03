@@ -7,7 +7,7 @@ import pytest
 
 from swh.auth import KeycloakOpenIDConnect
 
-from .sample_data import OIDC_PROFILE, REALM, SERVER_URL, WELL_KNOWN
+from .sample_data import OIDC_PROFILE, REALM, SERVER_URL, USER_INFO, WELL_KNOWN
 
 
 @pytest.fixture
@@ -24,6 +24,7 @@ def mock_keycloak(requests_mock):
     """
     requests_mock.get(WELL_KNOWN["well-known"], json=WELL_KNOWN)
     requests_mock.post(WELL_KNOWN["token_endpoint"], json=OIDC_PROFILE)
+    requests_mock.get(WELL_KNOWN["userinfo_endpoint"], json=USER_INFO)
 
     return requests_mock
 

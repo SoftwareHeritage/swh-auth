@@ -270,3 +270,15 @@ OIDC_PROFILE = {
     "session_state": "d82b90d1-0a94-4e74-ad66-dd95341c7b6d",
     "token_type": "bearer",
 }
+
+
+USER_INFO = {
+    "email": "john.doe@example.com",
+    "email_verified": False,
+    "family_name": "Doe",
+    "given_name": "John",
+    "groups": ["/staff"],
+    "name": "John Doe",
+    "preferred_username": "johndoe",
+    "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
+}
