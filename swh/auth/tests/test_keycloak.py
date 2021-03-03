@@ -9,11 +9,20 @@ from urllib.parse import parse_qs, urlparse
 from keycloak.exceptions import KeycloakError
 import pytest
 
-from swh.auth.tests.conftest import keycloak_mock_factory
-from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, USER_INFO
+from swh.auth.pytest_plugin import keycloak_mock_factory
+from swh.auth.tests.sample_data import (
+    CLIENT_ID,
+    DECODED_TOKEN,
+    OIDC_PROFILE,
+    REALM_NAME,
+    SERVER_URL,
+    USER_INFO,
+)
 
-# dataset we have here is bound to swh-web
-keycloak_mock = keycloak_mock_factory(client_id=CLIENT_ID)
+# Make keycloak fixture to use for tests below.
+keycloak_mock = keycloak_mock_factory(
+    server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
+)
 
 
 def test_keycloak_well_known(keycloak_mock):
