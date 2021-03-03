@@ -5,18 +5,15 @@
 
 from urllib.parse import parse_qs, urlparse
 
+from keycloak.exceptions import KeycloakAuthenticationError, KeycloakConnectionError
 import pytest
 
-from swh.auth import KeycloakOpenIDConnect
-
-from .conftest import REALM, SERVER_URL, WELL_KNOWN
+from .sample_data import OIDC_PROFILE, WELL_KNOWN
 
 
-@pytest.fixture
-def keycloak_open_id_connect():
-    return KeycloakOpenIDConnect(
-        server_url=SERVER_URL, realm_name=REALM, client_id="client-id",
-    )
+def test_auth_connection_failure(keycloak_open_id_connect):
+    with pytest.raises(KeycloakConnectionError):
+        keycloak_open_id_connect.well_known()
 
 
 def test_auth_well_known(mock_keycloak, keycloak_open_id_connect):
@@ -43,5 +40,31 @@ def test_auth_authorization_url(mock_keycloak, keycloak_open_id_connect):
         "redirect_uri": ["http://redirect-uri"],
         "foo": ["bar"],
     }
+
+    assert mock_keycloak.called
+
+
+def test_auth_authorization_code_fail(
+    mock_keycloak_refused_auth, keycloak_open_id_connect
+):
+    with pytest.raises(KeycloakAuthenticationError):
+        keycloak_open_id_connect.authorization_code("auth-code", "redirect-uri")
+
+    assert mock_keycloak_refused_auth.called
+
+
+def test_auth_authorization_code(mock_keycloak, keycloak_open_id_connect):
+    actual_response = keycloak_open_id_connect.authorization_code(
+        "auth-code", "redirect-uri"
+    )
+
+    assert actual_response == OIDC_PROFILE
+
+    assert mock_keycloak.called
+
+
+def test_auth_refresh_token(mock_keycloak, keycloak_open_id_connect):
+    actual_result = keycloak_open_id_connect.refresh_token("refresh-token")
+    assert actual_result is not None
 
     assert mock_keycloak.called
