@@ -11,7 +11,7 @@ from unittest.mock import Mock
 from keycloak.exceptions import KeycloakError
 import pytest
 
-from swh.auth import KeycloakOpenIDConnect
+from swh.auth.keycloak import KeycloakOpenIDConnect
 
 from .sample_data import (
     OIDC_PROFILE,

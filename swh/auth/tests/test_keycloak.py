@@ -16,7 +16,7 @@ from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, U
 keycloak_mock = keycloak_mock_factory(client_id=CLIENT_ID)
 
 
-def test_auth_well_known(keycloak_mock):
+def test_keycloak_well_known(keycloak_mock):
     well_known_result = keycloak_mock.well_known()
     assert set(well_known_result.keys()) == {
         "issuer",
@@ -29,7 +29,7 @@ def test_auth_well_known(keycloak_mock):
     }
 
 
-def test_auth_authorization_url(keycloak_mock):
+def test_keycloak_authorization_url(keycloak_mock):
     actual_auth_uri = keycloak_mock.authorization_url("http://redirect-uri", foo="bar")
 
     expected_auth_url = keycloak_mock.well_known()["authorization_endpoint"]
@@ -45,7 +45,7 @@ def test_auth_authorization_url(keycloak_mock):
     }
 
 
-def test_auth_authorization_code_fail(keycloak_mock):
+def test_keycloak_authorization_code_fail(keycloak_mock):
     "Authorization failure raise error"
     # Simulate failed authentication with Keycloak
     keycloak_mock.set_auth_success(False)
@@ -54,27 +54,27 @@ def test_auth_authorization_code_fail(keycloak_mock):
         keycloak_mock.authorization_code("auth-code", "redirect-uri")
 
 
-def test_auth_authorization_code(keycloak_mock):
+def test_keycloak_authorization_code(keycloak_mock):
     actual_response = keycloak_mock.authorization_code("auth-code", "redirect-uri")
     assert actual_response == OIDC_PROFILE
 
 
-def test_auth_refresh_token(keycloak_mock):
+def test_keycloak_refresh_token(keycloak_mock):
     actual_result = keycloak_mock.refresh_token("refresh-token")
     assert actual_result == OIDC_PROFILE
 
 
-def test_auth_userinfo(keycloak_mock):
+def test_keycloak_userinfo(keycloak_mock):
     actual_user_info = keycloak_mock.userinfo("refresh-token")
     assert actual_user_info == USER_INFO
 
 
-def test_auth_logout(keycloak_mock):
+def test_keycloak_logout(keycloak_mock):
     """Login out does not raise"""
     keycloak_mock.logout("refresh-token")
 
 
-def test_auth_decode_token(keycloak_mock):
+def test_keycloak_decode_token(keycloak_mock):
     actual_decoded_data = keycloak_mock.decode_token(OIDC_PROFILE["access_token"])
 
     actual_decoded_data2 = copy(actual_decoded_data)
