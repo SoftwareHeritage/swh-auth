@@ -1,0 +1,5 @@
+swh-auth (0.0.1-1~swh1) unstable-swh; urgency=medium
+
+  * Initial release
+
+ -- Antoine R. Dumont (@ardumont) <ardumont@softwareheritage.org>  Thu, 04 Mar 2021 13:58:13 +0100
