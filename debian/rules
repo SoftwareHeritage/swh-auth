@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export PYBUILD_NAME=swh.auth
+export PYBUILD_TEST_ARGS=-x -v -m "not db and not fs and not network"
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
