@@ -124,12 +124,14 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         # method "Cannot assign to a method affecting mock". Ignore for now.
         self.authorization_code = Mock()  # type: ignore
         self.refresh_token = Mock()  # type: ignore
+        self.login = Mock()  # type: ignore
         self.userinfo = Mock()  # type: ignore
         self.logout = Mock()  # type: ignore
         self.auth_success = auth_success
         if auth_success:
             self.authorization_code.return_value = copy(oidc_profile)
             self.refresh_token.return_value = copy(oidc_profile)
+            self.login.return_value = copy(oidc_profile)
             self.userinfo.return_value = copy(user_info)
         else:
             self.authorization_url = Mock()  # type: ignore

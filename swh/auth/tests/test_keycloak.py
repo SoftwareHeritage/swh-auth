@@ -93,3 +93,8 @@ def test_keycloak_decode_token(keycloak_mock):
         expected_decoded_token.pop(dynamic_valued_key)
 
     assert actual_decoded_data2 == expected_decoded_token
+
+
+def test_keycloak_login(keycloak_mock):
+    actual_response = keycloak_mock.login("username", "password")
+    assert actual_response == OIDC_PROFILE
