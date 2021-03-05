@@ -1,3 +1,14 @@
+swh-auth (0.2.0-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.2.0     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-05 14:46:12
+    +0100)
+  * Upstream changes:     - v0.2.0     - keycloak: Open from_config*
+    method to instantiate KeycloakOpenIDConnect     - setup: Adapt
+    parse_requirements function according to template
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 05 Mar 2021 13:47:54 +0000
+
 swh-auth (0.1.0-1~swh2) unstable-swh; urgency=medium
 
   * Bump new release
