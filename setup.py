@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2019-2020  The Software Heritage developers
+# Copyright (C) 2019-2021  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -16,31 +16,29 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 
-def parse_requirements(name=None):
-    if name:
-        reqf = "requirements-%s.txt" % name
-    else:
-        reqf = "requirements.txt"
-
+def parse_requirements(*names):
     requirements = []
-    if not path.exists(reqf):
-        return requirements
+    for name in names:
+        if name:
+            reqf = "requirements-%s.txt" % name
+        else:
+            reqf = "requirements.txt"
 
-    with open(reqf) as f:
-        for line in f.readlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            requirements.append(line)
+        if not path.exists(reqf):
+            return requirements
+
+        with open(reqf) as f:
+            for line in f.readlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                requirements.append(line)
     return requirements
 
 
-# Edit this part to match your module.
-# Full sample:
-#   https://forge.softwareheritage.org/diffusion/DCORE/browse/master/setup.py
 setup(
     name="swh.auth",
-    description="Software Heritage Authentication",
+    description="Software Heritage Authentication Utilities",
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires=">=3.7",
@@ -48,7 +46,7 @@ setup(
     author_email="swh-devel@inria.fr",
     url="https://forge.softwareheritage.org/source/swh-auth/",
     packages=find_packages(),  # packages's modules
-    install_requires=parse_requirements() + parse_requirements("swh"),
+    install_requires=parse_requirements(None, "swh"),
     tests_require=parse_requirements("test"),
     setup_requires=["setuptools-scm"],
     use_scm_version=True,

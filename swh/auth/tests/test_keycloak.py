@@ -4,11 +4,14 @@
 # See top-level LICENSE file for more information
 
 from copy import copy
+import os
 from urllib.parse import parse_qs, urlparse
 
 from keycloak.exceptions import KeycloakError
 import pytest
+import yaml
 
+from swh.auth.keycloak import KeycloakOpenIDConnect
 from swh.auth.pytest_plugin import keycloak_mock_factory
 from swh.auth.tests.sample_data import (
     CLIENT_ID,
@@ -18,6 +21,7 @@ from swh.auth.tests.sample_data import (
     SERVER_URL,
     USER_INFO,
 )
+from swh.core.config import read
 
 # Make keycloak fixture to use for tests below.
 keycloak_mock = keycloak_mock_factory(
@@ -98,3 +102,63 @@ def test_keycloak_decode_token(keycloak_mock):
 def test_keycloak_login(keycloak_mock):
     actual_response = keycloak_mock.login("username", "password")
     assert actual_response == OIDC_PROFILE
+
+
+@pytest.fixture
+def auth_config():
+    return {
+        "keycloak": {
+            "server_url": "https://auth.swh.org/SWHTest",
+            "realm_name": "SWHTest",
+            "client_id": "client_id",
+        }
+    }
+
+
+@pytest.fixture
+def auth_config_path(tmp_path, monkeypatch, auth_config):
+    conf_path = os.path.join(tmp_path, "auth.yml")
+    with open(conf_path, "w") as f:
+        f.write(yaml.dump(auth_config))
+    monkeypatch.setenv("SWH_CONFIG_FILENAME", conf_path)
+    return conf_path
+
+
+def test_auth_KeycloakOpenIDConnect_from_config(auth_config):
+    """Instantiating keycloak client out of configuration dict is possible
+
+     """
+    client = KeycloakOpenIDConnect.from_config(**auth_config)
+
+    assert client.server_url == auth_config["keycloak"]["server_url"]
+    assert client.realm_name == auth_config["keycloak"]["realm_name"]
+    assert client.client_id == auth_config["keycloak"]["client_id"]
+
+
+def test_auth_KeycloakOpenIDConnect_from_configfile(auth_config_path, monkeypatch):
+    """Instantiating keycloak client out of environment variable is possible
+
+     """
+    client = KeycloakOpenIDConnect.from_configfile()
+
+    auth_config = read(auth_config_path)
+
+    assert client.server_url == auth_config["keycloak"]["server_url"]
+    assert client.realm_name == auth_config["keycloak"]["realm_name"]
+    assert client.client_id == auth_config["keycloak"]["client_id"]
+
+
+def test_auth_KeycloakOpenIDConnect_from_configfile_override(
+    auth_config_path, monkeypatch
+):
+    """Instantiating keycloak client out of environment variable is possible
+    And caller can override the configuration  at calling
+
+     """
+    client = KeycloakOpenIDConnect.from_configfile(client_id="foobar")
+
+    auth_config = read(auth_config_path)
+
+    assert client.server_url == auth_config["keycloak"]["server_url"]
+    assert client.realm_name == auth_config["keycloak"]["realm_name"]
+    assert client.client_id == "foobar"
