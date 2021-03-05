@@ -1,3 +1,13 @@
+swh-auth (0.1.0-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.1.0     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-05 09:13:03
+    +0100)
+  * Upstream changes:     - v0.1.0     - keycloak: Open direct grant
+    login endpoint     - Expose a pytest plugin for swh.auth.keycloak
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 05 Mar 2021 08:14:31 +0000
+
 swh-auth (0.0.1-1~swh1.1) unstable-swh; urgency=medium
 
   * Fix missing dependencies and trigger tests during package build
