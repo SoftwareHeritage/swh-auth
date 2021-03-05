@@ -4,8 +4,8 @@
 # See top-level LICENSE file for more information
 
 SERVER_URL = "http://keycloak:8080/keycloak/auth/"
-REALM = "SoftwareHeritage"
-CLIENT_ID = "swh-web"
+REALM_NAME = "SoftwareHeritage"
+CLIENT_ID = "client-id"
 
 # Decoded token (out of the access token)
 DECODED_TOKEN = {
@@ -132,11 +132,3 @@ RAW_REALM_PUBLIC_KEY = (
     "drX/q4E+Nzj8Tr8p7Z5CimInls40QuOTIhs6C2SwFHUgQgXl9hB9umiZJlwYEpDv0/LO2zYie"
     "Hl5Lv7Iig4FOIXIVCaDGQIDAQAB"
 )
-
-REALM_PUBLIC_KEY = {
-    "realm": REALM,
-    "public_key": RAW_REALM_PUBLIC_KEY,
-    "token-service": f"{SERVER_URL}realms/{REALM}/protocol/openid-connect",
-    "account-service": f"{SERVER_URL}realms/{REALM}/account",
-    "tokens-not-before": 0,
-}

@@ -1,8 +1,18 @@
-swh-auth (0.0.1-1~swh1.1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.1.0-1~swh2) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * Bump new release
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 04 Mar 2021 15:05:38 +0000
+ -- Antoine R. Dumont (@ardumont) <ardumont@softwareheritage.org>  Fri, 05 Mar 2021 10:10:53 +0100
+
+swh-auth (0.1.0-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.1.0     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-05 09:13:03
+    +0100)
+  * Upstream changes:     - v0.1.0     - keycloak: Open direct grant
+    login endpoint     - Expose a pytest plugin for swh.auth.keycloak
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 05 Mar 2021 08:14:31 +0000
 
 swh-auth (0.0.1-1~swh1.1) unstable-swh; urgency=medium
 

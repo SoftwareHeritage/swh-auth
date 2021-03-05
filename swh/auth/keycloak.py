@@ -83,6 +83,26 @@ class KeycloakOpenIDConnect:
             **extra_params,
         )
 
+    def login(
+        self, username: str, password: str, **extra_params: str
+    ) -> Dict[str, Any]:
+        """
+        Get OpenID Connect authentication tokens using Direct Access Grant flow.
+
+        Args:
+            username: an existing username in the realm
+            password: password associated to username
+            extra_params: Extra parameters to add in the authorization request
+                payload.
+        """
+        return self._keycloak.token(
+            grant_type="password",
+            scope="openid",
+            username=username,
+            password=password,
+            **extra_params,
+        )
+
     def refresh_token(self, refresh_token: str) -> Dict[str, Any]:
         """
         Request a new access token from Keycloak using a refresh token.
