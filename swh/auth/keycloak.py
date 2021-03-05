@@ -8,6 +8,8 @@ from urllib.parse import urlencode
 
 from keycloak import KeycloakOpenID
 
+from swh.core.config import load_from_envvar
+
 
 class KeycloakOpenIDConnect:
     """
@@ -158,3 +160,43 @@ class KeycloakOpenIDConnect:
             A dictionary fillled with user information
         """
         return self._keycloak.userinfo(access_token)
+
+    @classmethod
+    def from_config(cls, **kwargs: Any) -> "KeycloakOpenIDConnect":
+        """Instantiate a KeycloakOpenIDConnect class from a configuration dict.
+
+        Args:
+
+            kwargs: configuration dict for the instance, with one keycloak key, whose
+                value is a Dict with the following keys:
+                - server_url: URL of the Keycloak server
+                - realm_name: The realm name
+                - client_id: The OpenID Connect client identifier
+
+        Returns:
+            the KeycloakOpenIDConnect instance
+
+        """
+        cfg = kwargs["keycloak"]
+        return cls(
+            server_url=cfg["server_url"],
+            realm_name=cfg["realm_name"],
+            client_id=cfg["client_id"],
+        )
+
+    @classmethod
+    def from_configfile(cls, **kwargs: Any) -> "KeycloakOpenIDConnect":
+
+        """Instantiate a KeycloakOpenIDConnect class from the configuration loaded from the
+        SWH_CONFIG_FILENAME envvar, with potential extra keyword arguments if their
+        value is not None.
+
+        Args:
+            kwargs: kwargs passed to instantiation call
+
+        Returns:
+            the KeycloakOpenIDConnect instance
+        """
+        config = dict(load_from_envvar()).get("keycloak", {})
+        config.update({k: v for k, v in kwargs.items() if v is not None})
+        return cls.from_config(keycloak=config)
