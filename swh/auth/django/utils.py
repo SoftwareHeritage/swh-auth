@@ -3,9 +3,11 @@
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from swh.auth.django.models import OIDCUser
+from swh.auth.keycloak import KeycloakOpenIDConnect
 
 
 def oidc_user_from_decoded_token(
@@ -53,5 +55,43 @@ def oidc_user_from_decoded_token(
 
     # add user sub to custom User proxy model
     user.sub = decoded_token["sub"]
+
+    return user
+
+
+def oidc_user_from_profile(
+    oidc_client: KeycloakOpenIDConnect, oidc_profile: Dict[str, Any]
+) -> OIDCUser:
+    """Initialize an OIDCUser out of an oidc profile dict.
+
+    Args:
+        oidc_client: KeycloakOpenIDConnect used to discuss with keycloak
+        oidc_profile: OIDC profile retrieved once connected to keycloak
+
+    Returns:
+        OIDCUser instance parsed out of the token received.
+
+    """
+
+    # decode JWT token
+    decoded_token = oidc_client.decode_token(oidc_profile["access_token"])
+
+    # create OIDCUser from decoded token
+    user = oidc_user_from_decoded_token(decoded_token, client_id=oidc_client.client_id)
+
+    # get authentication init datetime
+    auth_datetime = datetime.fromtimestamp(decoded_token["auth_time"])
+    exp_datetime = datetime.fromtimestamp(decoded_token["exp"])
+
+    # compute OIDC tokens expiration date
+    oidc_profile["expires_at"] = exp_datetime
+    oidc_profile["refresh_expires_at"] = auth_datetime + timedelta(
+        seconds=oidc_profile["refresh_expires_in"]
+    )
+
+    # add OIDC profile data to custom User proxy model
+    for key, val in oidc_profile.items():
+        if hasattr(user, key):
+            setattr(user, key, val)
 
     return user
