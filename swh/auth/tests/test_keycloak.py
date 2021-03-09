@@ -12,21 +12,8 @@ import pytest
 import yaml
 
 from swh.auth.keycloak import KeycloakOpenIDConnect
-from swh.auth.pytest_plugin import keycloak_mock_factory
-from swh.auth.tests.sample_data import (
-    CLIENT_ID,
-    DECODED_TOKEN,
-    OIDC_PROFILE,
-    REALM_NAME,
-    SERVER_URL,
-    USER_INFO,
-)
+from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, USER_INFO
 from swh.core.config import read
-
-# Make keycloak fixture to use for tests below.
-keycloak_mock = keycloak_mock_factory(
-    server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
-)
 
 
 def test_keycloak_well_known(keycloak_mock):
