@@ -1,3 +1,10 @@
+swh-auth (0.3.0-1~swh2) unstable-swh; urgency=medium
+
+  * Add python3-swh.auth.django build package
+  * Bump new release
+
+ -- Antoine R. Dumont (@ardumont) <ardumont@softwareheritage.org>  Tue, 09 Mar 2021 15:26:58 +0100
+
 swh-auth (0.3.0-1~swh1) unstable-swh; urgency=medium
 
   * New upstream release 0.3.0     - (tagged by Antoine R. Dumont
