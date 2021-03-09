@@ -50,7 +50,10 @@ setup(
     tests_require=parse_requirements("test"),
     setup_requires=["setuptools-scm"],
     use_scm_version=True,
-    extras_require={"testing": parse_requirements("test")},
+    extras_require={
+        "django": parse_requirements("django"),
+        "testing": parse_requirements("test"),
+    },
     include_package_data=True,
     # entry_points="""
     #     [swh.cli.subcommands]
