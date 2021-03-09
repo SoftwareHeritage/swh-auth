@@ -3,7 +3,6 @@
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
-from copy import copy
 from typing import Set
 
 import pytest
@@ -16,15 +15,13 @@ NO_PERMISSION: Set[str] = set()
 
 @pytest.fixture
 def appuser():
-    return copy(
-        AppUser(
-            id=666,
-            username="foo",
-            password="bar",
-            first_name="foobar",
-            last_name="",
-            email="foo@bar.org",
-        )
+    return AppUser(
+        id=666,
+        username="foo",
+        password="bar",
+        first_name="foobar",
+        last_name="",
+        email="foo@bar.org",
     )
 
 
