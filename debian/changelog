@@ -1,8 +1,21 @@
-swh-auth (0.2.0-1~swh1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.3.0-1~swh2) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * Add python3-swh.auth.django build package
+  * Bump new release
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 05 Mar 2021 13:48:41 +0000
+ -- Antoine R. Dumont (@ardumont) <ardumont@softwareheritage.org>  Tue, 09 Mar 2021 15:26:58 +0100
+
+swh-auth (0.3.0-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.3.0     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-09 14:50:34
+    +0100)
+  * Upstream changes:     - v0.3.0     - swh.auth.django: Add parse oidc
+    profile to OIDCUser utility func     - swh.auth.django: Add parse
+    decoded token to a OIDCUser utility func     - swh.auth.django:
+    Expose OIDCUser model object
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Tue, 09 Mar 2021 13:52:36 +0000
 
 swh-auth (0.2.0-1~swh1) unstable-swh; urgency=medium
 

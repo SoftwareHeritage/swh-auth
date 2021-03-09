@@ -11,6 +11,7 @@ conftest.py
 mypy.ini
 pyproject.toml
 pytest.ini
+requirements-django.txt
 requirements-swh.txt
 requirements-test.txt
 requirements.txt
@@ -34,6 +35,19 @@ swh/auth/cli.py
 swh/auth/keycloak.py
 swh/auth/py.typed
 swh/auth/pytest_plugin.py
+swh/auth/django/__init__.py
+swh/auth/django/models.py
+swh/auth/django/utils.py
 swh/auth/tests/__init__.py
+swh/auth/tests/conftest.py
 swh/auth/tests/sample_data.py
 swh/auth/tests/test_keycloak.py
+swh/auth/tests/test_models.py
+swh/auth/tests/test_utils.py
+swh/auth/tests/app/__init__.py
+swh/auth/tests/app/manage.py
+swh/auth/tests/app/apptest/__init__.py
+swh/auth/tests/app/apptest/apps.py
+swh/auth/tests/app/apptest/models.py
+swh/auth/tests/app/apptest/settings.py
+swh/auth/tests/app/apptest/urls.py

@@ -1,6 +1,10 @@
 python-keycloak>=0.19.0
 swh.core[http]>=0.3
 
+[django]
+Django<3
+
 [testing]
 pytest
 requests_mock
+pytest-django
