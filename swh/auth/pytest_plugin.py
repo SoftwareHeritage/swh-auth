@@ -97,6 +97,10 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
             options["verify_exp"] = False
             options["verify_aud"] = False
         decoded = super().decode_token(token, options)
+        # Merge the user info configured to be part of the decode token
+        userinfo = self.userinfo()
+        if userinfo is not None:
+            decoded = {**decoded, **userinfo}
         # tweak auth and exp time for tests
         expire_in = decoded["exp"] - decoded["auth_time"]
         if self.exp is not None:
