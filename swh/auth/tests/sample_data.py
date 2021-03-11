@@ -7,6 +7,18 @@ SERVER_URL = "http://keycloak:8080/keycloak/auth/"
 REALM_NAME = "SoftwareHeritage"
 CLIENT_ID = "client-id"
 
+USER_INFO = {
+    "email": "john.doe@example.com",
+    "email_verified": False,
+    "family_name": "Doe",
+    "given_name": "John",
+    "groups": [],
+    "name": "John Doe",
+    "preferred_username": "johndoe",
+    "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
+}
+
+
 # Decoded token (out of the access token)
 DECODED_TOKEN = {
     "jti": "31fc50b7-bbe5-4f51-91ef-8e3eec51331e",
@@ -15,7 +27,6 @@ DECODED_TOKEN = {
     "iat": 1582723101,
     "iss": "http://localhost:8080/auth/realms/SoftwareHeritage",
     "aud": [CLIENT_ID, "account"],
-    "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
     "typ": "Bearer",
     "azp": CLIENT_ID,
     "auth_time": 1614786418,
@@ -27,13 +38,7 @@ DECODED_TOKEN = {
         "account": {"roles": ["manage-account", "manage-account-links", "view-profile"]}
     },
     "scope": "openid email profile",
-    "email_verified": False,
-    "name": "John Doe",
-    "groups": [],
-    "preferred_username": "johndoe",
-    "given_name": "John",
-    "family_name": "Doe",
-    "email": "john.doe@example.com",
+    **USER_INFO,
 }
 
 # Authentication response is an oidc profile dict
@@ -111,17 +116,6 @@ OIDC_PROFILE = {
     "scope": "openid email profile",
     "session_state": "d82b90d1-0a94-4e74-ad66-dd95341c7b6d",
     "token_type": "bearer",
-}
-
-USER_INFO = {
-    "email": "john.doe@example.com",
-    "email_verified": False,
-    "family_name": "Doe",
-    "given_name": "John",
-    "groups": ["/staff"],
-    "name": "John Doe",
-    "preferred_username": "johndoe",
-    "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
 }
 
 RAW_REALM_PUBLIC_KEY = (
