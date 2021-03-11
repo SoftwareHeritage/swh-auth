@@ -1,3 +1,13 @@
+swh-auth (0.3.1-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.3.1     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-11 16:10:57
+    +0100)
+  * Upstream changes:     - v0.3.1     - swh.auth.pytest_plugin: Make
+    decoded_token consistent with user_info
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 11 Mar 2021 15:12:40 +0000
+
 swh-auth (0.3.0-1~swh2) unstable-swh; urgency=medium
 
   * Add python3-swh.auth.django build package
