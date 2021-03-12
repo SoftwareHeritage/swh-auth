@@ -53,6 +53,9 @@ def test_keycloak_authorization_code_fail(keycloak_mock):
     with pytest.raises(KeycloakError):
         keycloak_mock.authorization_code("auth-code", "redirect-uri")
 
+    with pytest.raises(KeycloakError):
+        keycloak_mock.login("username", "password")
+
 
 def test_keycloak_authorization_code(keycloak_mock):
     actual_response = keycloak_mock.authorization_code("auth-code", "redirect-uri")

@@ -147,6 +147,7 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
             self.refresh_token.side_effect = exception
             self.userinfo.side_effect = exception
             self.logout.side_effect = exception
+            self.login.side_effect = exception
 
 
 def keycloak_mock_factory(
