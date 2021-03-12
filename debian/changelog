@@ -1,3 +1,13 @@
+swh-auth (0.3.2-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.3.2     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-12 10:41:47
+    +0100)
+  * Upstream changes:     - v0.3.2     - swh.auth.pytest_plugin: Install
+    missing side-effect for login method
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 12 Mar 2021 09:43:23 +0000
+
 swh-auth (0.3.1-1~swh1) unstable-swh; urgency=medium
 
   * New upstream release 0.3.1     - (tagged by Antoine R. Dumont
