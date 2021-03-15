@@ -102,13 +102,18 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         if userinfo is not None:
             decoded = {**decoded, **userinfo}
         # tweak auth and exp time for tests
-        expire_in = decoded["exp"] - decoded["auth_time"]
+        auth_time = decoded.get("auth_time", decoded["iat"])
+        expire_in = decoded["exp"] - auth_time
         if self.exp is not None:
             decoded["exp"] = self.exp
-            decoded["auth_time"] = self.exp - expire_in
+            auth_time = self.exp - expire_in
+            decoded["iat"] = auth_time
+            decoded["auth_time"] = auth_time
         else:
-            decoded["auth_time"] = int(datetime.now(tz=timezone.utc).timestamp())
-            decoded["exp"] = decoded["auth_time"] + expire_in
+            now = int(datetime.now(tz=timezone.utc).timestamp())
+            decoded["iat"] = now
+            decoded["auth_time"] = now
+            decoded["exp"] = now + expire_in
         decoded["groups"] = self.user_groups
         decoded["aud"] = [self.client_id, "account"]
         decoded["azp"] = self.client_id
