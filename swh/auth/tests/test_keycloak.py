@@ -82,9 +82,9 @@ def test_keycloak_decode_token(keycloak_mock):
 
     actual_decoded_data2 = copy(actual_decoded_data)
     expected_decoded_token = copy(DECODED_TOKEN)
-    for dynamic_valued_key in ["exp", "auth_time"]:
-        actual_decoded_data2.pop(dynamic_valued_key)
-        expected_decoded_token.pop(dynamic_valued_key)
+    for dynamic_valued_key in ["exp", "iat", "auth_time"]:
+        actual_decoded_data2.pop(dynamic_valued_key, None)
+        expected_decoded_token.pop(dynamic_valued_key, None)
 
     assert actual_decoded_data2 == expected_decoded_token
 

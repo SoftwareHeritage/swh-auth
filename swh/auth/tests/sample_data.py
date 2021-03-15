@@ -18,18 +18,19 @@ USER_INFO = {
     "sub": "feacd344-b468-4a65-a236-14f61e6b7200",
 }
 
+IAT = 1614786418
+EXP = IAT + 300
 
 # Decoded token (out of the access token)
 DECODED_TOKEN = {
     "jti": "31fc50b7-bbe5-4f51-91ef-8e3eec51331e",
-    "exp": 1614787019,
+    "exp": EXP,
     "nbf": 0,
-    "iat": 1582723101,
+    "iat": IAT,
     "iss": "http://localhost:8080/auth/realms/SoftwareHeritage",
     "aud": [CLIENT_ID, "account"],
     "typ": "Bearer",
     "azp": CLIENT_ID,
-    "auth_time": 1614786418,
     "session_state": "d82b90d1-0a94-4e74-ad66-dd95341c7b6d",
     "acr": "1",
     "allowed-origins": ["*"],
