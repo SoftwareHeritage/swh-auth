@@ -80,8 +80,7 @@ def oidc_user_from_profile(
     user = oidc_user_from_decoded_token(decoded_token, client_id=oidc_client.client_id)
 
     # get authentication init datetime
-    auth_time = decoded_token.get("auth_time", decoded_token["iat"])
-    auth_datetime = datetime.fromtimestamp(auth_time)
+    auth_datetime = datetime.fromtimestamp(decoded_token["iat"])
     exp_datetime = datetime.fromtimestamp(decoded_token["exp"])
 
     # compute OIDC tokens expiration date
