@@ -32,11 +32,11 @@ def oidc_user_from_decoded_token(
     # create a Django user that will not be saved to database
     user = OIDCUser(
         id=user_id,
-        username=decoded_token["preferred_username"],
+        username=decoded_token.get("preferred_username", ""),
         password="",
-        first_name=decoded_token["given_name"],
-        last_name=decoded_token["family_name"],
-        email=decoded_token["email"],
+        first_name=decoded_token.get("given_name", ""),
+        last_name=decoded_token.get("family_name", ""),
+        email=decoded_token.get("email", ""),
     )
 
     # set is_staff user property based on groups
