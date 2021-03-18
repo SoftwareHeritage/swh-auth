@@ -1,3 +1,14 @@
+swh-auth (0.3.4-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.3.4     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-18 18:24:22
+    +0100)
+  * Upstream changes:     - v0.3.4     -
+    django.utils.oidc_user_from_decoded_token: Relax fields constraint
+    - django/utils: Get access token renewal date from proper dict field
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 18 Mar 2021 17:26:07 +0000
+
 swh-auth (0.3.3-1~swh1) unstable-swh; urgency=medium
 
   * New upstream release 0.3.3     - (tagged by Antoine R. Dumont
