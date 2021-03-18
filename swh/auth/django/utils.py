@@ -32,11 +32,11 @@ def oidc_user_from_decoded_token(
     # create a Django user that will not be saved to database
     user = OIDCUser(
         id=user_id,
-        username=decoded_token["preferred_username"],
+        username=decoded_token.get("preferred_username", ""),
         password="",
-        first_name=decoded_token["given_name"],
-        last_name=decoded_token["family_name"],
-        email=decoded_token["email"],
+        first_name=decoded_token.get("given_name", ""),
+        last_name=decoded_token.get("family_name", ""),
+        email=decoded_token.get("email", ""),
     )
 
     # set is_staff user property based on groups
@@ -80,8 +80,7 @@ def oidc_user_from_profile(
     user = oidc_user_from_decoded_token(decoded_token, client_id=oidc_client.client_id)
 
     # get authentication init datetime
-    auth_time = decoded_token.get("auth_time", decoded_token["iat"])
-    auth_datetime = datetime.fromtimestamp(auth_time)
+    auth_datetime = datetime.fromtimestamp(decoded_token["iat"])
     exp_datetime = datetime.fromtimestamp(decoded_token["exp"])
 
     # compute OIDC tokens expiration date
