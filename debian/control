@@ -27,4 +27,5 @@ Package: python3-swh.auth.django
 Architecture: all
 Depends: python3-swh.auth (= ${binary:Version}),
          ${misc:Depends}, ${python3:Depends}
-Description: Software Heritage Deposit Loader
+Description: Software Heritage Authentication library (Django)
+
