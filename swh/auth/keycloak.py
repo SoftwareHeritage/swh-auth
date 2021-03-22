@@ -8,6 +8,10 @@ from urllib.parse import urlencode
 
 from keycloak import KeycloakOpenID
 
+# The next import is required to allow callers to catch on their own term the following
+# exception
+from keycloak.exceptions import KeycloakError  # noqa
+
 from swh.core.config import load_from_envvar
 
 
@@ -71,6 +75,9 @@ class KeycloakOpenIDConnect:
         Get OpenID Connect authentication tokens using Authorization
         Code flow.
 
+        Raises:
+            KeycloakError in case of authentication failures
+
         Args:
             code: Authorization code provided by Keycloak
             redirect_uri: URI to redirect to once a user is authenticated
@@ -90,6 +97,9 @@ class KeycloakOpenIDConnect:
     ) -> Dict[str, Any]:
         """
         Get OpenID Connect authentication tokens using Direct Access Grant flow.
+
+        Raises:
+            KeycloakError in case of authentication failures
 
         Args:
             username: an existing username in the realm
