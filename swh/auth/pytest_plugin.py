@@ -5,6 +5,7 @@
 
 from copy import copy
 from datetime import datetime, timezone
+import json
 from typing import Dict, List, Optional
 from unittest.mock import Mock
 
@@ -140,9 +141,12 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
             self.userinfo.return_value = copy(user_info)
         else:
             self.authorization_url = Mock()  # type: ignore
-            exception = KeycloakError(
-                error_message="Authentication failed", response_code=401
-            )
+            error = {
+                "error": "invalid_grant",
+                "error_description": "Invalid user credentials",
+            }
+            error_message = json.dumps(error).encode()
+            exception = KeycloakError(error_message=error_message, response_code=401)
             self.authorization_code.side_effect = exception
             self.authorization_url.side_effect = exception
             self.refresh_token.side_effect = exception
