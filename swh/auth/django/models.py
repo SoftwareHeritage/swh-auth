@@ -41,6 +41,7 @@ class OIDCUser(User):
         # and isn't in an application in INSTALLED_APPS"
         app_label = ""
         proxy = True
+        auto_created = True  # prevent model to be created in database by migrations
 
     def save(self, **kwargs):
         """
