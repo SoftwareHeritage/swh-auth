@@ -4,6 +4,7 @@
 # See top-level LICENSE file for more information
 
 from copy import copy
+import json
 import os
 from urllib.parse import parse_qs, urlparse
 
@@ -11,7 +12,7 @@ from keycloak.exceptions import KeycloakError
 import pytest
 import yaml
 
-from swh.auth.keycloak import KeycloakOpenIDConnect
+from swh.auth.keycloak import KeycloakOpenIDConnect, keycloak_error_message
 from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, USER_INFO
 from swh.core.config import read
 
@@ -152,3 +153,23 @@ def test_auth_KeycloakOpenIDConnect_from_configfile_override(
     assert client.server_url == auth_config["keycloak"]["server_url"]
     assert client.realm_name == auth_config["keycloak"]["realm_name"]
     assert client.client_id == "foobar"
+
+
+@pytest.mark.parametrize(
+    "error_dict, expected_result",
+    [
+        ({"error": "unknown_error"}, "unknown_error"),
+        (
+            {"error": "invalid_grant", "error_description": "Invalid credentials"},
+            "invalid_grant: Invalid credentials",
+        ),
+    ],
+)
+def test_auth_keycloak_error_message(error_dict, expected_result):
+    """Conversion from KeycloakError to error message should work with detail or not"""
+    error_message = json.dumps(error_dict).encode()
+    exception = KeycloakError(error_message=error_message, response_code=401)
+
+    actual_result = keycloak_error_message(exception)
+
+    assert actual_result == expected_result
