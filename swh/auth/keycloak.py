@@ -3,6 +3,7 @@
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
+import json
 from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 
@@ -210,3 +211,15 @@ class KeycloakOpenIDConnect:
         config = dict(load_from_envvar()).get("keycloak", {})
         config.update({k: v for k, v in kwargs.items() if v is not None})
         return cls.from_config(keycloak=config)
+
+
+def keycloak_error_message(keycloak_error: KeycloakError) -> str:
+    """Transform a keycloak exception into an error message.
+
+    """
+    msg_dict = json.loads(keycloak_error.error_message.decode())
+    error_msg = msg_dict["error"]
+    error_desc = msg_dict.get("error_description")
+    if error_desc:
+        error_msg = f"{error_msg}: {error_desc}"
+    return error_msg
