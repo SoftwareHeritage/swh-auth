@@ -204,6 +204,17 @@ keycloak_mock_factory = keycloak_oidc_factory
 # generic keycloak fixture that can be used within tests
 # (cf. test_keycloak.py, test_utils.py, django related tests)
 # or external modules using that pytest plugin
-keycloak_oidc = keycloak_oidc_factory(
+_keycloak_oidc = keycloak_oidc_factory(
     server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
 )
+
+
+@pytest.fixture
+def keycloak_oidc(_keycloak_oidc, mocker):
+    for oidc_client_factory in (
+        "swh.auth.django.views.keycloak_oidc_client",
+        "swh.auth.django.backends.keycloak_oidc_client",
+    ):
+        keycloak_oidc_client = mocker.patch(oidc_client_factory)
+        keycloak_oidc_client.return_value = _keycloak_oidc
+    return _keycloak_oidc

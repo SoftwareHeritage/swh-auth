@@ -7,9 +7,11 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.http import HttpRequest, QueryDict
+from django.urls import reverse as django_reverse
 
 from swh.auth.django.models import OIDCUser
-from swh.auth.keycloak import KeycloakOpenIDConnect
+from swh.auth.keycloak import ExpiredSignatureError, KeycloakOpenIDConnect
 
 
 def oidc_user_from_decoded_token(
@@ -76,7 +78,15 @@ def oidc_user_from_profile(
     """
 
     # decode JWT token
-    decoded_token = oidc_client.decode_token(oidc_profile["access_token"])
+    try:
+        access_token = oidc_profile["access_token"]
+        decoded_token = oidc_client.decode_token(access_token)
+    # access token has expired
+    except ExpiredSignatureError:
+        # get a new access token from authentication provider
+        oidc_profile = oidc_client.refresh_token(oidc_profile["refresh_token"])
+        # decode access token
+        decoded_token = oidc_client.decode_token(oidc_profile["access_token"])
 
     # create OIDCUser from decoded token
     user = oidc_user_from_decoded_token(decoded_token, client_id=oidc_client.client_id)
@@ -99,13 +109,17 @@ def oidc_user_from_profile(
     return user
 
 
+def oidc_profile_cache_key(oidc_client: KeycloakOpenIDConnect, user_id: int) -> str:
+    return f"oidc_user_{oidc_client.realm_name}_{oidc_client.client_id}_{user_id}"
+
+
 def keycloak_oidc_client() -> KeycloakOpenIDConnect:
     """
     Instantiate a KeycloakOpenIDConnect class from the following django settings:
 
-        * KEYCLOAK_SERVER_URL
-        * KEYCLOAK_REALM_NAME
-        * KEYCLOAK_CLIENT_ID
+        * SWH_AUTH_SERVER_URL
+        * SWH_AUTH_REALM_NAME
+        * SWH_AUTH_CLIENT_ID
 
     Returns:
         An object to ease the interaction with the Keycloak server
@@ -114,16 +128,62 @@ def keycloak_oidc_client() -> KeycloakOpenIDConnect:
         ValueError: at least one mandatory django setting is not set
     """
 
-    server_url = getattr(settings, "KEYCLOAK_SERVER_URL", None)
-    realm_name = getattr(settings, "KEYCLOAK_REALM_NAME", None)
-    client_id = getattr(settings, "KEYCLOAK_CLIENT_ID", None)
+    server_url = getattr(settings, "SWH_AUTH_SERVER_URL", None)
+    realm_name = getattr(settings, "SWH_AUTH_REALM_NAME", None)
+    client_id = getattr(settings, "SWH_AUTH_CLIENT_ID", None)
 
     if server_url is None or realm_name is None or client_id is None:
         raise ValueError(
-            "KEYCLOAK_SERVER_URL, KEYCLOAK_REALM_NAME and KEYCLOAK_CLIENT_ID django "
+            "SWH_AUTH_SERVER_URL, SWH_AUTH_REALM_NAME and SWH_AUTH_CLIENT_ID django "
             "settings are mandatory to instantiate KeycloakOpenIDConnect class"
         )
 
     return KeycloakOpenIDConnect(
         server_url=server_url, realm_name=realm_name, client_id=client_id
     )
+
+
+def reverse(
+    viewname: str,
+    url_args: Optional[Dict[str, Any]] = None,
+    query_params: Optional[Dict[str, Any]] = None,
+    current_app: Optional[str] = None,
+    urlconf: Optional[str] = None,
+    request: Optional[HttpRequest] = None,
+) -> str:
+    """An override of django reverse function supporting query parameters.
+
+    Args:
+        viewname: the name of the django view from which to compute a url
+        url_args: dictionary of url arguments indexed by their names
+        query_params: dictionary of query parameters to append to the
+            reversed url
+        current_app: the name of the django app tighten to the view
+        urlconf: url configuration module
+        request: build an absolute URI if provided
+
+    Returns:
+        str: the url of the requested view with processed arguments and
+        query parameters
+    """
+
+    if url_args:
+        url_args = {k: v for k, v in url_args.items() if v is not None}
+
+    url = django_reverse(
+        viewname, urlconf=urlconf, kwargs=url_args, current_app=current_app
+    )
+
+    if query_params:
+        query_params = {k: v for k, v in query_params.items() if v is not None}
+
+    if query_params and len(query_params) > 0:
+        query_dict = QueryDict("", mutable=True)
+        for k in sorted(query_params.keys()):
+            query_dict[k] = query_params[k]
+        url += "?" + query_dict.urlencode(safe="/;:")
+
+    if request is not None:
+        url = request.build_absolute_uri(url)
+
+    return url

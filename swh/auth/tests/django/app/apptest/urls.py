@@ -3,4 +3,14 @@
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
-urlpatterns = []  # type: ignore
+from django.conf.urls import url
+from django.http import HttpResponse
+
+from swh.auth.django.views import urlpatterns as auth_urlpatterns
+
+
+def _root_view(request):
+    return HttpResponse("Hello World !")
+
+
+urlpatterns = [url(r"^$", _root_view, name="root")] + auth_urlpatterns
