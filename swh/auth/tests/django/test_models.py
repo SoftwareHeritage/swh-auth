@@ -7,7 +7,7 @@ from typing import Set
 
 import pytest
 
-from swh.auth.tests.app.apptest.models import AppUser
+from .app.apptest.models import AppUser
 
 PERMISSIONS: Set[str] = set(["api", "app-label-read"])
 NO_PERMISSION: Set[str] = set()
