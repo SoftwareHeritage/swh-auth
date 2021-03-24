@@ -6,10 +6,21 @@
 from copy import copy
 from datetime import datetime
 
+from django.test import override_settings
 import pytest
 
-from swh.auth.django.utils import oidc_user_from_decoded_token, oidc_user_from_profile
-from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE
+from swh.auth.django.utils import (
+    keycloak_oidc_client,
+    oidc_user_from_decoded_token,
+    oidc_user_from_profile,
+)
+from swh.auth.tests.sample_data import (
+    CLIENT_ID,
+    DECODED_TOKEN,
+    OIDC_PROFILE,
+    REALM_NAME,
+    SERVER_URL,
+)
 
 
 def test_oidc_user_from_decoded_token():
@@ -87,3 +98,24 @@ def test_oidc_user_from_profile(keycloak_mock):
     assert date_now <= user.expires_at
     assert isinstance(user.refresh_expires_at, datetime)
     assert date_now <= user.refresh_expires_at
+
+
+def test_keycloak_oidc_client_missing_django_settings():
+
+    with pytest.raises(ValueError, match="settings are mandatory"):
+        keycloak_oidc_client()
+
+
+@override_settings(
+    KEYCLOAK_SERVER_URL=SERVER_URL,
+    KEYCLOAK_REALM_NAME=REALM_NAME,
+    KEYCLOAK_CLIENT_ID=CLIENT_ID,
+)
+def test_keycloak_oidc_client_parameters_from_django_settings(mocker):
+    mocker.patch("swh.auth.keycloak.KeycloakOpenID")
+
+    kc_oidc_client = keycloak_oidc_client()
+
+    assert kc_oidc_client.server_url == SERVER_URL
+    assert kc_oidc_client.realm_name == REALM_NAME
+    assert kc_oidc_client.client_id == CLIENT_ID
