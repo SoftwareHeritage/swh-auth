@@ -155,7 +155,7 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
             self.login.side_effect = exception
 
 
-def keycloak_mock_factory(
+def keycloak_oidc_factory(
     server_url: str,
     realm_name: str,
     client_id: str,
@@ -173,7 +173,7 @@ def keycloak_mock_factory(
     """
 
     @pytest.fixture
-    def keycloak_open_id_connect():
+    def keycloak_oidc():
         return KeycloackOpenIDConnectMock(
             server_url=server_url,
             realm_name=realm_name,
@@ -187,4 +187,9 @@ def keycloak_mock_factory(
             raw_realm_public_key=raw_realm_public_key,
         )
 
-    return keycloak_open_id_connect
+    return keycloak_oidc
+
+
+# for backward compatibility
+# TODO: remove that alias once swh-deposit and swh-web use new function name
+keycloak_mock_factory = keycloak_oidc_factory

@@ -92,8 +92,8 @@ def test_oidc_user_from_decoded_token_empty_fields_ok(key, mapped_key):
     assert getattr(user, mapped_key) == ""
 
 
-def test_oidc_user_from_profile(keycloak_mock):
-    user = oidc_user_from_profile(keycloak_mock, OIDC_PROFILE)
+def test_oidc_user_from_profile(keycloak_oidc):
+    user = oidc_user_from_profile(keycloak_oidc, OIDC_PROFILE)
     _check_user(user)
 
 

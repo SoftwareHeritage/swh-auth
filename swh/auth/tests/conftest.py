@@ -4,10 +4,10 @@
 # See top-level LICENSE file for more information
 
 
-from swh.auth.pytest_plugin import keycloak_mock_factory
+from swh.auth.pytest_plugin import keycloak_oidc_factory
 from swh.auth.tests.sample_data import CLIENT_ID, REALM_NAME, SERVER_URL
 
 # keycloak fixture used within tests (cf. test_keycloak.py, test_utils.py)
-keycloak_mock = keycloak_mock_factory(
+keycloak_oidc = keycloak_oidc_factory(
     server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
 )
