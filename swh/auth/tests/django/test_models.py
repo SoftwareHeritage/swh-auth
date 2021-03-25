@@ -7,15 +7,15 @@ from typing import Set
 
 import pytest
 
-from .app.apptest.models import AppUser
+from swh.auth.django.models import OIDCUser
 
 PERMISSIONS: Set[str] = set(["api", "app-label-read"])
 NO_PERMISSION: Set[str] = set()
 
 
 @pytest.fixture
-def appuser():
-    return AppUser(
+def oidc_user():
+    return OIDCUser(
         id=666,
         username="foo",
         password="bar",
@@ -26,43 +26,43 @@ def appuser():
 
 
 @pytest.fixture
-def appuser_admin(appuser):
-    appuser_admin = appuser
-    appuser_admin.is_active = True
-    appuser_admin.is_superuser = True
-    return appuser_admin
+def oidc_user_admin(oidc_user):
+    oidc_user_admin = oidc_user
+    oidc_user_admin.is_active = True
+    oidc_user_admin.is_superuser = True
+    return oidc_user_admin
 
 
-def test_django_appuser(appuser):
-    appuser.permissions = PERMISSIONS
+def test_django_oidc_user(oidc_user):
+    oidc_user.permissions = PERMISSIONS
 
-    assert appuser.get_group_permissions() == PERMISSIONS
-    assert appuser.get_group_permissions(appuser) == PERMISSIONS
-    assert appuser.get_all_permissions() == PERMISSIONS
-    assert appuser.get_all_permissions(appuser) == PERMISSIONS
+    assert oidc_user.get_group_permissions() == PERMISSIONS
+    assert oidc_user.get_group_permissions(oidc_user) == PERMISSIONS
+    assert oidc_user.get_all_permissions() == PERMISSIONS
+    assert oidc_user.get_all_permissions(oidc_user) == PERMISSIONS
 
     assert "api" in PERMISSIONS
-    assert appuser.has_perm("api") is True
-    assert appuser.has_perm("something") is False
+    assert oidc_user.has_perm("api") is True
+    assert oidc_user.has_perm("something") is False
 
     assert "app-label-read" in PERMISSIONS
-    assert appuser.has_module_perms("app-label") is True
-    assert appuser.has_module_perms("app-something") is False
+    assert oidc_user.has_module_perms("app-label") is True
+    assert oidc_user.has_module_perms("app-something") is False
 
 
-def test_django_appuser_admin(appuser_admin):
-    appuser_admin.permissions = NO_PERMISSION
+def test_django_oidc_user_admin(oidc_user_admin):
+    oidc_user_admin.permissions = NO_PERMISSION
 
-    assert appuser_admin.get_group_permissions() == NO_PERMISSION
-    assert appuser_admin.get_group_permissions(appuser_admin) == NO_PERMISSION
+    assert oidc_user_admin.get_group_permissions() == NO_PERMISSION
+    assert oidc_user_admin.get_group_permissions(oidc_user_admin) == NO_PERMISSION
 
-    assert appuser_admin.get_all_permissions() == NO_PERMISSION
-    assert appuser_admin.get_all_permissions(appuser) == NO_PERMISSION
+    assert oidc_user_admin.get_all_permissions() == NO_PERMISSION
+    assert oidc_user_admin.get_all_permissions(oidc_user) == NO_PERMISSION
 
     assert "foobar" not in PERMISSIONS
-    assert appuser_admin.has_perm("foobar") is True
+    assert oidc_user_admin.has_perm("foobar") is True
     assert "something" not in PERMISSIONS
-    assert appuser_admin.has_perm("something") is True
+    assert oidc_user_admin.has_perm("something") is True
 
-    assert appuser_admin.has_module_perms("app-label") is True
-    assert appuser_admin.has_module_perms("really-whatever-app") is True
+    assert oidc_user_admin.has_module_perms("app-label") is True
+    assert oidc_user_admin.has_module_perms("really-whatever-app") is True
