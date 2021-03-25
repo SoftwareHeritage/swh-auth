@@ -13,7 +13,14 @@ from keycloak.exceptions import KeycloakError
 import pytest
 
 from swh.auth.keycloak import KeycloakOpenIDConnect
-from swh.auth.tests.sample_data import OIDC_PROFILE, RAW_REALM_PUBLIC_KEY, USER_INFO
+from swh.auth.tests.sample_data import (
+    CLIENT_ID,
+    OIDC_PROFILE,
+    RAW_REALM_PUBLIC_KEY,
+    REALM_NAME,
+    SERVER_URL,
+    USER_INFO,
+)
 
 
 class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
@@ -193,3 +200,10 @@ def keycloak_oidc_factory(
 # for backward compatibility
 # TODO: remove that alias once swh-deposit and swh-web use new function name
 keycloak_mock_factory = keycloak_oidc_factory
+
+# generic keycloak fixture that can be used within tests
+# (cf. test_keycloak.py, test_utils.py, django related tests)
+# or external modules using that pytest plugin
+keycloak_oidc = keycloak_oidc_factory(
+    server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
+)
