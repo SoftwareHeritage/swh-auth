@@ -108,8 +108,7 @@ def test_keycloak_oidc_client_missing_django_settings():
     KEYCLOAK_REALM_NAME=REALM_NAME,
     KEYCLOAK_CLIENT_ID=CLIENT_ID,
 )
-def test_keycloak_oidc_client_parameters_from_django_settings(mocker):
-    mocker.patch("swh.auth.keycloak.KeycloakOpenID")
+def test_keycloak_oidc_client_parameters_from_django_settings():
 
     kc_oidc_client = keycloak_oidc_client()
 
