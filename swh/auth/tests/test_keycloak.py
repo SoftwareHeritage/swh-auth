@@ -17,8 +17,8 @@ from swh.auth.tests.sample_data import CLIENT_ID, DECODED_TOKEN, OIDC_PROFILE, U
 from swh.core.config import read
 
 
-def test_keycloak_well_known(keycloak_mock):
-    well_known_result = keycloak_mock.well_known()
+def test_keycloak_oidc_well_known(keycloak_oidc):
+    well_known_result = keycloak_oidc.well_known()
     assert set(well_known_result.keys()) == {
         "issuer",
         "authorization_endpoint",
@@ -30,10 +30,10 @@ def test_keycloak_well_known(keycloak_mock):
     }
 
 
-def test_keycloak_authorization_url(keycloak_mock):
-    actual_auth_uri = keycloak_mock.authorization_url("http://redirect-uri", foo="bar")
+def test_keycloak_oidc_authorization_url(keycloak_oidc):
+    actual_auth_uri = keycloak_oidc.authorization_url("http://redirect-uri", foo="bar")
 
-    expected_auth_url = keycloak_mock.well_known()["authorization_endpoint"]
+    expected_auth_url = keycloak_oidc.well_known()["authorization_endpoint"]
     parsed_result = urlparse(actual_auth_uri)
     assert expected_auth_url.endswith(parsed_result.path)
 
@@ -46,40 +46,40 @@ def test_keycloak_authorization_url(keycloak_mock):
     }
 
 
-def test_keycloak_authorization_code_fail(keycloak_mock):
+def test_keycloak_oidc_authorization_code_fail(keycloak_oidc):
     "Authorization failure raise error"
     # Simulate failed authentication with Keycloak
-    keycloak_mock.set_auth_success(False)
+    keycloak_oidc.set_auth_success(False)
 
     with pytest.raises(KeycloakError):
-        keycloak_mock.authorization_code("auth-code", "redirect-uri")
+        keycloak_oidc.authorization_code("auth-code", "redirect-uri")
 
     with pytest.raises(KeycloakError):
-        keycloak_mock.login("username", "password")
+        keycloak_oidc.login("username", "password")
 
 
-def test_keycloak_authorization_code(keycloak_mock):
-    actual_response = keycloak_mock.authorization_code("auth-code", "redirect-uri")
+def test_keycloak_oidc_authorization_code(keycloak_oidc):
+    actual_response = keycloak_oidc.authorization_code("auth-code", "redirect-uri")
     assert actual_response == OIDC_PROFILE
 
 
-def test_keycloak_refresh_token(keycloak_mock):
-    actual_result = keycloak_mock.refresh_token("refresh-token")
+def test_keycloak_oidc_refresh_token(keycloak_oidc):
+    actual_result = keycloak_oidc.refresh_token("refresh-token")
     assert actual_result == OIDC_PROFILE
 
 
-def test_keycloak_userinfo(keycloak_mock):
-    actual_user_info = keycloak_mock.userinfo("refresh-token")
+def test_keycloak_oidc_userinfo(keycloak_oidc):
+    actual_user_info = keycloak_oidc.userinfo("refresh-token")
     assert actual_user_info == USER_INFO
 
 
-def test_keycloak_logout(keycloak_mock):
+def test_keycloak_oidc_logout(keycloak_oidc):
     """Login out does not raise"""
-    keycloak_mock.logout("refresh-token")
+    keycloak_oidc.logout("refresh-token")
 
 
-def test_keycloak_decode_token(keycloak_mock):
-    actual_decoded_data = keycloak_mock.decode_token(OIDC_PROFILE["access_token"])
+def test_keycloak_oidc_decode_token(keycloak_oidc):
+    actual_decoded_data = keycloak_oidc.decode_token(OIDC_PROFILE["access_token"])
 
     actual_decoded_data2 = copy(actual_decoded_data)
     expected_decoded_token = copy(DECODED_TOKEN)
@@ -90,8 +90,8 @@ def test_keycloak_decode_token(keycloak_mock):
     assert actual_decoded_data2 == expected_decoded_token
 
 
-def test_keycloak_login(keycloak_mock):
-    actual_response = keycloak_mock.login("username", "password")
+def test_keycloak_oidc_login(keycloak_oidc):
+    actual_response = keycloak_oidc.login("username", "password")
     assert actual_response == OIDC_PROFILE
 
 

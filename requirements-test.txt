@@ -1,3 +1,6 @@
+django-stubs
+djangorestframework-stubs
 pytest
-requests_mock
 pytest-django
+pytest-mock
+requests_mock

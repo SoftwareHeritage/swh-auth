@@ -40,11 +40,24 @@ class KeycloakOpenIDConnect:
         self._keycloak = KeycloakOpenID(
             server_url=server_url, client_id=client_id, realm_name=realm_name,
         )
-
         self.server_url = server_url
-        self.realm_name = realm_name
-        self.client_id = client_id
         self.realm_public_key = realm_public_key
+
+    @property
+    def realm_name(self):
+        return self._keycloak.realm_name
+
+    @realm_name.setter
+    def realm_name(self, value):
+        self._keycloak.realm_name = value
+
+    @property
+    def client_id(self):
+        return self._keycloak.client_id
+
+    @client_id.setter
+    def client_id(self, value):
+        self._keycloak.client_id = value
 
     def well_known(self) -> Dict[str, Any]:
         """
