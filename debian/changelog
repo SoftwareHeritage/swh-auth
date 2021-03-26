@@ -1,8 +1,16 @@
-swh-auth (0.3.8-1~swh1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.4.0-1~swh1) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * New upstream release 0.4.0     - (tagged by Antoine R. Dumont
+    (@ardumont) <ardumont@softwareheritage.org> on 2021-03-26 14:01:34
+    +0100)
+  * Upstream changes:     - v0.4.0     - tests: Simplify OIDCUser tests
+    - django/models: Add new fields and oidc_profile property to
+    OIDCUser     - pytest_plugin: Add generic keycloak_oidc fixture
+    instantiation     - tests: Rename keycloak_mock fixture to
+    keycloak_oidc     - docs: Unify doc and git READMEs     -
+    django/utils: Add KeycloakOpenIDConnect factory function
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Tue, 23 Mar 2021 16:38:44 +0000
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 26 Mar 2021 13:03:47 +0000
 
 swh-auth (0.3.8-1~swh1) unstable-swh; urgency=medium
 

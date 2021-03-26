@@ -7,4 +7,4 @@ from django.apps import AppConfig
 
 
 class TestApp(AppConfig):
-    name = "swh.auth.tests.app"
+    name = "swh.auth.tests.django.app.apptest"
