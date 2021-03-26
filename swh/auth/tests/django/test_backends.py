@@ -9,7 +9,9 @@ from unittest.mock import Mock
 from django.conf import settings
 from django.contrib.auth import authenticate, get_backends
 import pytest
+from rest_framework.exceptions import AuthenticationFailed
 
+from swh.auth.django.backends import OIDCBearerTokenAuthentication
 from swh.auth.django.models import OIDCUser
 from swh.auth.django.utils import reverse
 from swh.auth.keycloak import ExpiredSignatureError
@@ -144,6 +146,109 @@ def test_oidc_code_pkce_auth_backend_permissions(keycloak_oidc, request_factory)
     permission = "webapp.some-permission"
     keycloak_oidc.user_permissions = [permission]
     user = _authenticate_user(request_factory)
+    assert user.has_perm(permission)
+    assert user.get_all_permissions() == {permission}
+    assert user.get_group_permissions() == {permission}
+    assert user.has_module_perms("webapp")
+    assert not user.has_module_perms("foo")
+
+
+@pytest.mark.django_db
+def test_drf_oidc_bearer_token_auth_backend_success(keycloak_oidc, api_request_factory):
+    """
+    Checks successful login based on OpenID Connect bearer token Django REST
+    Framework authentication backend (Web API login).
+    """
+    url = reverse("api-test")
+    drf_auth_backend = OIDCBearerTokenAuthentication()
+
+    oidc_profile = keycloak_oidc.login()
+    refresh_token = oidc_profile["refresh_token"]
+    access_token = oidc_profile["access_token"]
+
+    decoded_token = keycloak_oidc.decode_token(access_token)
+
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
+
+    user, _ = drf_auth_backend.authenticate(request)
+    _check_authenticated_user(user, decoded_token, keycloak_oidc)
+    # oidc_profile is not filled when authenticating through bearer token
+    assert hasattr(user, "access_token") and user.access_token is None
+
+
+@pytest.mark.django_db
+def test_drf_oidc_bearer_token_auth_backend_failure(keycloak_oidc, api_request_factory):
+    """
+    Checks failed login based on OpenID Connect bearer token Django REST
+    Framework authentication backend (Web API login).
+    """
+    url = reverse("api-test")
+    drf_auth_backend = OIDCBearerTokenAuthentication()
+
+    oidc_profile = keycloak_oidc.login()
+
+    # simulate a failed authentication with a bearer token in expected format
+    keycloak_oidc.set_auth_success(False)
+
+    refresh_token = oidc_profile["refresh_token"]
+
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
+
+    with pytest.raises(AuthenticationFailed):
+        drf_auth_backend.authenticate(request)
+
+    # simulate a failed authentication with an invalid bearer token format
+    request = api_request_factory.get(
+        url, HTTP_AUTHORIZATION="Bearer invalid-token-format"
+    )
+
+    with pytest.raises(AuthenticationFailed):
+        drf_auth_backend.authenticate(request)
+
+
+def test_drf_oidc_auth_invalid_or_missing_auth_type(keycloak_oidc, api_request_factory):
+    """
+    Checks failed login based on OpenID Connect bearer token Django REST
+    Framework authentication backend (Web API login) due to invalid
+    authorization header value.
+    """
+    url = reverse("api-test")
+    drf_auth_backend = OIDCBearerTokenAuthentication()
+
+    oidc_profile = keycloak_oidc.login()
+    refresh_token = oidc_profile["refresh_token"]
+
+    # Invalid authorization type
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION="Foo token")
+
+    with pytest.raises(AuthenticationFailed):
+        drf_auth_backend.authenticate(request)
+
+    # Missing authorization type
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION=f"{refresh_token}")
+
+    with pytest.raises(AuthenticationFailed):
+        drf_auth_backend.authenticate(request)
+
+
+@pytest.mark.django_db
+def test_drf_oidc_bearer_token_auth_backend_permissions(
+    keycloak_oidc, api_request_factory
+):
+    """
+    Checks that a permission defined with OpenID Connect is correctly mapped
+    to a Django one when using bearer token authentication.
+    """
+    permission = "webapp.some-permission"
+    keycloak_oidc.user_permissions = [permission]
+
+    drf_auth_backend = OIDCBearerTokenAuthentication()
+    oidc_profile = keycloak_oidc.login()
+    refresh_token = oidc_profile["refresh_token"]
+    url = reverse("api-test")
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
+    user, _ = drf_auth_backend.authenticate(request)
+
     assert user.has_perm(permission)
     assert user.get_all_permissions() == {permission}
     assert user.get_group_permissions() == {permission}

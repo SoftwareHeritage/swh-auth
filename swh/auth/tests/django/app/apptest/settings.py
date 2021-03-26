@@ -39,3 +39,11 @@ AUTHENTICATION_BACKENDS = [
 SWH_AUTH_SERVER_URL = SERVER_URL
 SWH_AUTH_REALM_NAME = REALM_NAME
 SWH_AUTH_CLIENT_ID = CLIENT_ID
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "swh.auth.django.backends.OIDCBearerTokenAuthentication",
+    ],
+}

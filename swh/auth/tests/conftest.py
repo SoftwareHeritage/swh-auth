@@ -4,9 +4,22 @@
 # See top-level LICENSE file for more information
 
 import pytest
+from rest_framework.test import APIClient, APIRequestFactory
 
 
 # Alias rf fixture from pytest-django
 @pytest.fixture
 def request_factory(rf):
     return rf
+
+
+# Fixture to get test client from Django REST Framework
+@pytest.fixture(scope="module")
+def api_client():
+    return APIClient()
+
+
+# Fixture to get API request factory from Django REST Framework
+@pytest.fixture(scope="module")
+def api_request_factory():
+    return APIRequestFactory()
