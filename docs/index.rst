@@ -1,5 +1,3 @@
-.. _swh-py-template:
-
 .. include:: README.rst
 
 .. toctree::
@@ -8,7 +6,7 @@
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
