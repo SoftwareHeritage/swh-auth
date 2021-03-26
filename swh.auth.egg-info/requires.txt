@@ -5,6 +5,9 @@ swh.core[http]>=0.3
 Django<3
 
 [testing]
+django-stubs
+djangorestframework-stubs
 pytest
-requests_mock
 pytest-django
+pytest-mock
+requests_mock

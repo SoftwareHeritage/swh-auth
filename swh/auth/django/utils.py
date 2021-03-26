@@ -6,6 +6,8 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
+from django.conf import settings
+
 from swh.auth.django.models import OIDCUser
 from swh.auth.keycloak import KeycloakOpenIDConnect
 
@@ -95,3 +97,33 @@ def oidc_user_from_profile(
             setattr(user, key, val)
 
     return user
+
+
+def keycloak_oidc_client() -> KeycloakOpenIDConnect:
+    """
+    Instantiate a KeycloakOpenIDConnect class from the following django settings:
+
+        * KEYCLOAK_SERVER_URL
+        * KEYCLOAK_REALM_NAME
+        * KEYCLOAK_CLIENT_ID
+
+    Returns:
+        An object to ease the interaction with the Keycloak server
+
+    Raises:
+        ValueError: at least one mandatory django setting is not set
+    """
+
+    server_url = getattr(settings, "KEYCLOAK_SERVER_URL", None)
+    realm_name = getattr(settings, "KEYCLOAK_REALM_NAME", None)
+    client_id = getattr(settings, "KEYCLOAK_CLIENT_ID", None)
+
+    if server_url is None or realm_name is None or client_id is None:
+        raise ValueError(
+            "KEYCLOAK_SERVER_URL, KEYCLOAK_REALM_NAME and KEYCLOAK_CLIENT_ID django "
+            "settings are mandatory to instantiate KeycloakOpenIDConnect class"
+        )
+
+    return KeycloakOpenIDConnect(
+        server_url=server_url, realm_name=realm_name, client_id=client_id
+    )

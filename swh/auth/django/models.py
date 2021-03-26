@@ -4,7 +4,7 @@
 # See top-level LICENSE file for more information
 
 from datetime import datetime
-from typing import Optional, Set
+from typing import Any, Dict, Optional, Set
 
 from django.contrib.auth.models import User
 
@@ -24,9 +24,11 @@ class OIDCUser(User):
     # OIDC tokens and session related data, only relevant when a user
     # authenticates from a web browser
     access_token: Optional[str] = None
+    expires_in: Optional[int] = None
     expires_at: Optional[datetime] = None
     id_token: Optional[str] = None
     refresh_token: Optional[str] = None
+    refresh_expires_in: Optional[int] = None
     refresh_expires_at: Optional[datetime] = None
     scope: Optional[str] = None
     session_state: Optional[str] = None
@@ -84,3 +86,23 @@ class OIDCUser(User):
             return True
 
         return any(perm.startswith(app_label) for perm in self.permissions)
+
+    @property
+    def oidc_profile(self) -> Dict[str, Any]:
+        """
+        Returns OpenID Connect profile associated to the user as a dictionary.
+        """
+        return {
+            k: getattr(self, k)
+            for k in (
+                "access_token",
+                "expires_in",
+                "expires_at",
+                "id_token",
+                "refresh_token",
+                "refresh_expires_in",
+                "refresh_expires_at",
+                "scope",
+                "session_state",
+            )
+        }
