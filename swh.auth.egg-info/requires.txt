@@ -2,7 +2,9 @@ python-keycloak>=0.19.0
 swh.core[http]>=0.3
 
 [django]
-Django<3
+django<3
+djangorestframework
+sentry-sdk
 
 [testing]
 django-stubs
