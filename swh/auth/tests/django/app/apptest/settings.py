@@ -20,6 +20,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "swh.auth.django.middlewares.OIDCSessionExpiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -39,6 +40,7 @@ AUTHENTICATION_BACKENDS = [
 SWH_AUTH_SERVER_URL = SERVER_URL
 SWH_AUTH_REALM_NAME = REALM_NAME
 SWH_AUTH_CLIENT_ID = CLIENT_ID
+SWH_AUTH_SESSION_EXPIRED_REDIRECT_VIEW = "logout"
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
