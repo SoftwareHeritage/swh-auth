@@ -7,10 +7,13 @@ import json
 from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 
+# add ExpiredSignatureError alias to avoid leaking jose import
+# in swh-auth client code
+from jose.jwt import ExpiredSignatureError  # noqa
 from keycloak import KeycloakOpenID
 
-# The next import is required to allow callers to catch on their own term the following
-# exception
+# add KeycloakError alias to avoid leaking keycloak import
+# in swh-auth client code
 from keycloak.exceptions import KeycloakError  # noqa
 
 from swh.core.config import load_from_envvar

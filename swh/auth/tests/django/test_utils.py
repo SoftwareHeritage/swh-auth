@@ -97,6 +97,9 @@ def test_oidc_user_from_profile(keycloak_oidc):
     _check_user(user)
 
 
+@override_settings(
+    SWH_AUTH_SERVER_URL=None, SWH_AUTH_REALM_NAME=None, SWH_AUTH_CLIENT_ID=None,
+)
 def test_keycloak_oidc_client_missing_django_settings():
 
     with pytest.raises(ValueError, match="settings are mandatory"):
@@ -104,9 +107,9 @@ def test_keycloak_oidc_client_missing_django_settings():
 
 
 @override_settings(
-    KEYCLOAK_SERVER_URL=SERVER_URL,
-    KEYCLOAK_REALM_NAME=REALM_NAME,
-    KEYCLOAK_CLIENT_ID=CLIENT_ID,
+    SWH_AUTH_SERVER_URL=SERVER_URL,
+    SWH_AUTH_REALM_NAME=REALM_NAME,
+    SWH_AUTH_CLIENT_ID=CLIENT_ID,
 )
 def test_keycloak_oidc_client_parameters_from_django_settings():
 
