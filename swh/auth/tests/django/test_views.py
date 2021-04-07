@@ -245,7 +245,6 @@ def test_oidc_login_complete_wrong_code_verifier(client, keycloak_oidc):
 
     # should render an error page
     response = client.get(login_url)
-    print(response.content)
     assert response.status_code == 500
 
     request = response.wsgi_request
