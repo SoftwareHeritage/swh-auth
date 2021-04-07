@@ -201,7 +201,10 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
             raise ValidationError("Invalid bearer token")
         except KeycloakError as ke:
             error_msg = keycloak_error_message(ke)
-            if error_msg == "invalid_grant: Offline user session not found":
+            if error_msg in (
+                "invalid_grant: Offline session not active",
+                "invalid_grant: Offline user session not found",
+            ):
                 error_msg = (
                     "Bearer token expired after a long period of inactivity; "
                     "please generate a new one."
