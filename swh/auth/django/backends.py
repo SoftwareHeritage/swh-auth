@@ -21,7 +21,12 @@ from swh.auth.django.utils import (
     oidc_user_from_decoded_token,
     oidc_user_from_profile,
 )
-from swh.auth.keycloak import ExpiredSignatureError, KeycloakOpenIDConnect
+from swh.auth.keycloak import (
+    ExpiredSignatureError,
+    KeycloakError,
+    KeycloakOpenIDConnect,
+    keycloak_error_message,
+)
 
 
 def _update_cached_oidc_profile(
@@ -194,6 +199,15 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
         except UnicodeEncodeError as e:
             sentry_sdk.capture_exception(e)
             raise ValidationError("Invalid bearer token")
+        except KeycloakError as ke:
+            error_msg = keycloak_error_message(ke)
+            if error_msg == "invalid_grant: Offline user session not found":
+                error_msg = (
+                    "Bearer token expired after a long period of inactivity; "
+                    "please generate a new one."
+                )
+            sentry_sdk.capture_exception(ke)
+            raise AuthenticationFailed(error_msg)
         except Exception as e:
             sentry_sdk.capture_exception(e)
             raise AuthenticationFailed(str(e))
