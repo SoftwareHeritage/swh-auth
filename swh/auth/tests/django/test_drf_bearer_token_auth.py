@@ -129,23 +129,25 @@ def test_drf_oidc_bearer_token_expired_token(keycloak_oidc, api_client):
 
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
 
-    kc_error_dict = {
-        "error": "invalid_grant",
-        "error_description": "Offline user session not found",
-    }
+    for kc_err_msg in ("Offline session not active", "Offline user session not found"):
 
-    keycloak_oidc.refresh_token.side_effect = KeycloakError(
-        error_message=json.dumps(kc_error_dict).encode(), response_code=400
-    )
+        kc_error_dict = {
+            "error": "invalid_grant",
+            "error_description": kc_err_msg,
+        }
 
-    response = api_client.get(url)
-    expected_error_msg = (
-        "Bearer token expired after a long period of inactivity; "
-        "please generate a new one."
-    )
+        keycloak_oidc.refresh_token.side_effect = KeycloakError(
+            error_message=json.dumps(kc_error_dict).encode(), response_code=400
+        )
 
-    assert response.status_code == 403
-    assert expected_error_msg in json.dumps(response.data)
+        response = api_client.get(url)
+        expected_error_msg = (
+            "Bearer token expired after a long period of inactivity; "
+            "please generate a new one."
+        )
 
-    request = response.wsgi_request
-    assert isinstance(request.user, AnonymousUser)
+        assert response.status_code == 403
+        assert expected_error_msg in json.dumps(response.data)
+
+        request = response.wsgi_request
+        assert isinstance(request.user, AnonymousUser)
