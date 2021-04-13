@@ -1,3 +1,5 @@
+.. _swh-auth:
+
 .. include:: README.rst
 
 Reference Documentation

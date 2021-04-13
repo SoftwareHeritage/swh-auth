@@ -1,5 +1,3 @@
-.. _swh-auth:
-
 Software Heritage - Authentication
 ==================================
 
