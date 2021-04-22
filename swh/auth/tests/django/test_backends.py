@@ -143,12 +143,15 @@ def test_oidc_code_pkce_auth_backend_permissions(keycloak_oidc, request_factory)
     Checks that a permission defined with OpenID Connect is correctly mapped
     to a Django one when logging from Web UI.
     """
-    permission = "webapp.some-permission"
-    keycloak_oidc.user_permissions = [permission]
+    realm_permission = "swh.some-permission"
+    client_permission = "webapp.some-permission"
+    keycloak_oidc.realm_permissions = [realm_permission]
+    keycloak_oidc.client_permissions = [client_permission]
     user = _authenticate_user(request_factory)
-    assert user.has_perm(permission)
-    assert user.get_all_permissions() == {permission}
-    assert user.get_group_permissions() == {permission}
+    assert user.has_perm(realm_permission)
+    assert user.has_perm(client_permission)
+    assert user.get_all_permissions() == {realm_permission, client_permission}
+    assert user.get_group_permissions() == {realm_permission, client_permission}
     assert user.has_module_perms("webapp")
     assert not user.has_module_perms("foo")
 
@@ -239,8 +242,10 @@ def test_drf_oidc_bearer_token_auth_backend_permissions(
     Checks that a permission defined with OpenID Connect is correctly mapped
     to a Django one when using bearer token authentication.
     """
-    permission = "webapp.some-permission"
-    keycloak_oidc.user_permissions = [permission]
+    realm_permission = "swh.some-permission"
+    client_permission = "webapp.some-permission"
+    keycloak_oidc.realm_permissions = [realm_permission]
+    keycloak_oidc.client_permissions = [client_permission]
 
     drf_auth_backend = OIDCBearerTokenAuthentication()
     oidc_profile = keycloak_oidc.login()
@@ -249,8 +254,9 @@ def test_drf_oidc_bearer_token_auth_backend_permissions(
     request = api_request_factory.get(url, HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
     user, _ = drf_auth_backend.authenticate(request)
 
-    assert user.has_perm(permission)
-    assert user.get_all_permissions() == {permission}
-    assert user.get_group_permissions() == {permission}
+    assert user.has_perm(realm_permission)
+    assert user.has_perm(client_permission)
+    assert user.get_all_permissions() == {realm_permission, client_permission}
+    assert user.get_group_permissions() == {realm_permission, client_permission}
     assert user.has_module_perms("webapp")
     assert not user.has_module_perms("foo")

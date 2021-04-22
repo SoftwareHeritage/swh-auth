@@ -63,14 +63,15 @@ def test_oidc_user_from_decoded_token():
     _check_user(user)
 
 
-def test_oidc_user_from_decoded_token2():
+def test_oidc_user_with_permissions_from_decoded_token():
     decoded_token = copy(DECODED_TOKEN)
     decoded_token["groups"] = ["/staff", "api"]
+    decoded_token["realm_access"] = {"roles": ["swh.ambassador"]}
     decoded_token["resource_access"] = {CLIENT_ID: {"roles": ["read-api"]}}
 
     user = oidc_user_from_decoded_token(decoded_token, client_id=CLIENT_ID)
 
-    _check_user(user, is_staff=True, permissions={"read-api"})
+    _check_user(user, is_staff=True, permissions={"swh.ambassador", "read-api"})
 
 
 @pytest.mark.parametrize(
