@@ -22,6 +22,7 @@ docs/.gitignore
 docs/Makefile
 docs/README.rst
 docs/conf.py
+docs/django.rst
 docs/index.rst
 docs/_static/.placeholder
 docs/_templates/.placeholder

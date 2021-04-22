@@ -1,13 +1,12 @@
+.. _swh-auth:
+
 .. include:: README.rst
+
+Reference Documentation
+-----------------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   django
+   /apidoc/swh.auth
