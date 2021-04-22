@@ -47,15 +47,17 @@ def oidc_user_from_decoded_token(
     if "groups" in decoded_token:
         user.is_staff = "/staff" in decoded_token["groups"]
 
+    realm_access = decoded_token.get("realm_access", {})
+    permissions = realm_access.get("roles", [])
+
     if client_id:
         # extract user permissions if any
         resource_access = decoded_token.get("resource_access", {})
         client_resource_access = resource_access.get(client_id, {})
-        permissions = client_resource_access.get("roles", [])
-    else:
-        permissions = []
+        permissions += client_resource_access.get("roles", [])
 
-    user.permissions = set(permissions)
+    # set user permissions and filter out default keycloak realm roles
+    user.permissions = set(permissions) - {"offline_access", "uma_authorization"}
 
     # add user sub to custom User proxy model
     user.sub = decoded_token["sub"]

@@ -34,7 +34,8 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         auth_success: boolean flag to simulate authentication success or failure
         exp: expiration delay
         user_groups: user groups configuration (if any)
-        user_permissions: user permissions configuration (if any)
+        realm_permissions: user permissions configuration at realm level (if any)
+        client_permissions: user permissions configuration at client level (if any)
         oidc_profile: Dict response from a call to a token authentication query (cf.
             :py:data:`swh.auth.tests.sample_data.OIDC_PROFILE`)
         user_info: Dict response from a call to userinfo query (cf.
@@ -52,7 +53,8 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         auth_success: bool = True,
         exp: Optional[int] = None,
         user_groups: List[str] = [],
-        user_permissions: List[str] = [],
+        realm_permissions: List[str] = [],
+        client_permissions: List[str] = [],
         oidc_profile: Dict = OIDC_PROFILE,
         user_info: Dict = USER_INFO,
         raw_realm_public_key: str = RAW_REALM_PUBLIC_KEY,
@@ -62,7 +64,8 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         )
         self.exp = exp
         self.user_groups = user_groups
-        self.user_permissions = user_permissions
+        self.realm_permissions = realm_permissions
+        self.client_permissions = client_permissions
         self._keycloak.public_key = lambda: raw_realm_public_key
         self._keycloak.well_know = lambda: {
             "issuer": f"{self.server_url}realms/{self.realm_name}",
@@ -121,9 +124,10 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         decoded["groups"] = self.user_groups
         decoded["aud"] = [self.client_id, "account"]
         decoded["azp"] = self.client_id
-        if self.user_permissions:
+        decoded["realm_access"]["roles"] += self.realm_permissions
+        if self.client_permissions:
             decoded["resource_access"][self.client_id] = {
-                "roles": self.user_permissions
+                "roles": self.client_permissions
             }
         return decoded
 
@@ -169,7 +173,8 @@ def keycloak_oidc_factory(
     auth_success: bool = True,
     exp: Optional[int] = None,
     user_groups: List[str] = [],
-    user_permissions: List[str] = [],
+    realm_permissions: List[str] = [],
+    client_permissions: List[str] = [],
     oidc_profile: Dict = OIDC_PROFILE,
     user_info: Dict = USER_INFO,
     raw_realm_public_key: str = RAW_REALM_PUBLIC_KEY,
@@ -188,7 +193,8 @@ def keycloak_oidc_factory(
             auth_success=auth_success,
             exp=exp,
             user_groups=user_groups,
-            user_permissions=user_permissions,
+            realm_permissions=realm_permissions,
+            client_permissions=client_permissions,
             oidc_profile=oidc_profile,
             user_info=user_info,
             raw_realm_public_key=raw_realm_public_key,
