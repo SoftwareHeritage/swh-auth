@@ -59,6 +59,8 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         user_info: Dict = USER_INFO,
         raw_realm_public_key: str = RAW_REALM_PUBLIC_KEY,
     ):
+        """Constructor
+        """
         super().__init__(
             server_url=server_url, realm_name=realm_name, client_id=client_id
         )

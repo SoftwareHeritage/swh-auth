@@ -1,8 +1,10 @@
-swh-auth (0.5.3-1~swh1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.5.4-1~swh1) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * New upstream release 0.5.4     - (tagged by Antoine Lambert
+    <antoine.lambert@inria.fr> on 2021-04-29 14:20:23 +0200)
+  * Upstream changes:     - version 0.5.4
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 22 Apr 2021 16:50:04 +0000
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 29 Apr 2021 12:23:34 +0000
 
 swh-auth (0.5.3-1~swh1) unstable-swh; urgency=medium
 
