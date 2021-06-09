@@ -4,3 +4,6 @@ pytest
 pytest-django
 pytest-mock
 requests_mock
+types-click
+types-pytz
+types-pyyaml
