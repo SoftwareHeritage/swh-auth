@@ -173,3 +173,10 @@ def test_auth_keycloak_error_message(error_dict, expected_result):
     actual_result = keycloak_error_message(exception)
 
     assert actual_result == expected_result
+
+
+def test_auth_keycloak_error_message_string():
+    """Conversion from KeycloakError to error message should work with detail or not"""
+    error_message = "Can't connect to server "
+    exception = KeycloakError(error_message=error_message)
+    assert keycloak_error_message(exception) == error_message
