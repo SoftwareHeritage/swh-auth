@@ -21,6 +21,7 @@ tox.ini
 docs/.gitignore
 docs/Makefile
 docs/README.rst
+docs/cli.rst
 docs/conf.py
 docs/django.rst
 docs/index.rst
@@ -30,6 +31,7 @@ swh/__init__.py
 swh.auth.egg-info/PKG-INFO
 swh.auth.egg-info/SOURCES.txt
 swh.auth.egg-info/dependency_links.txt
+swh.auth.egg-info/entry_points.txt
 swh.auth.egg-info/requires.txt
 swh.auth.egg-info/top_level.txt
 swh/auth/__init__.py
@@ -47,6 +49,7 @@ swh/auth/django/views.py
 swh/auth/tests/__init__.py
 swh/auth/tests/conftest.py
 swh/auth/tests/sample_data.py
+swh/auth/tests/test_cli.py
 swh/auth/tests/test_keycloak.py
 swh/auth/tests/test_utils.py
 swh/auth/tests/django/__init__.py
