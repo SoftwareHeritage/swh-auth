@@ -1,4 +1,6 @@
+click
 python-keycloak>=0.19.0
+pyyaml
 swh.core[http]>=0.3
 
 [django]
@@ -13,3 +15,6 @@ pytest
 pytest-django
 pytest-mock
 requests_mock
+types-click
+types-pytz
+types-pyyaml

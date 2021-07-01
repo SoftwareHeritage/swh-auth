@@ -110,7 +110,7 @@ class KeycloakOpenIDConnect:
         )
 
     def login(
-        self, username: str, password: str, **extra_params: str
+        self, username: str, password: str, scope: str = "openid", **extra_params: str
     ) -> Dict[str, Any]:
         """
         Get OpenID Connect authentication tokens using Direct Access Grant flow.
@@ -126,7 +126,7 @@ class KeycloakOpenIDConnect:
         """
         return self._keycloak.token(
             grant_type="password",
-            scope="openid",
+            scope=scope,
             username=username,
             password=password,
             **extra_params,
@@ -233,9 +233,14 @@ def keycloak_error_message(keycloak_error: KeycloakError) -> str:
     """Transform a keycloak exception into an error message.
 
     """
-    msg_dict = json.loads(keycloak_error.error_message.decode())
-    error_msg = msg_dict["error"]
-    error_desc = msg_dict.get("error_description")
-    if error_desc:
-        error_msg = f"{error_msg}: {error_desc}"
-    return error_msg
+    try:
+        # keycloak error wrapped in a JSON document
+        msg_dict = json.loads(keycloak_error.error_message.decode())
+        error_msg = msg_dict["error"]
+        error_desc = msg_dict.get("error_description")
+        if error_desc:
+            error_msg = f"{error_msg}: {error_desc}"
+        return error_msg
+    except Exception:
+        # fallback: return error message string
+        return keycloak_error.error_message

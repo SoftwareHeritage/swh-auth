@@ -1,8 +1,10 @@
-swh-auth (0.5.4-1~swh1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.6.0-1~swh1) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * New upstream release 0.6.0     - (tagged by Antoine Lambert
+    <anlambert@softwareheritage.org> on 2021-07-01 15:13:18 +0200)
+  * Upstream changes:     - version 0.6.0
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 29 Apr 2021 12:24:36 +0000
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Thu, 01 Jul 2021 13:21:42 +0000
 
 swh-auth (0.5.4-1~swh1) unstable-swh; urgency=medium
 
