@@ -106,7 +106,8 @@ class OIDCAuthorizationCodePKCEBackend:
     def get_user(self, user_id: int) -> Optional[OIDCUser]:
         # get oidc profile from cache
         oidc_client = keycloak_oidc_client()
-        oidc_profile = cache.get(oidc_profile_cache_key(oidc_client, user_id))
+        cache_key = oidc_profile_cache_key(oidc_client, user_id)
+        oidc_profile = cache.get(cache_key)
         if oidc_profile:
             try:
                 user = oidc_user_from_profile(oidc_client, oidc_profile)
@@ -115,6 +116,12 @@ class OIDCAuthorizationCodePKCEBackend:
                 # restore auth backend
                 setattr(user, "backend", f"{__name__}.{self.__class__.__name__}")
                 return user
+            except KeycloakError as ke:
+                error_msg = keycloak_error_message(ke)
+                if error_msg == "invalid_grant: Session not active":
+                    # user session no longer active, remove oidc profile from cache
+                    cache.delete(cache_key)
+                return None
             except Exception as e:
                 sentry_sdk.capture_exception(e)
                 return None

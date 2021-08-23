@@ -4,17 +4,19 @@
 # See top-level LICENSE file for more information
 
 from datetime import datetime, timedelta
+import json
 from unittest.mock import Mock
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_backends
+from django.core.cache import cache
 import pytest
 from rest_framework.exceptions import AuthenticationFailed
 
 from swh.auth.django.backends import OIDCBearerTokenAuthentication
 from swh.auth.django.models import OIDCUser
-from swh.auth.django.utils import reverse
-from swh.auth.keycloak import ExpiredSignatureError
+from swh.auth.django.utils import oidc_profile_cache_key, reverse
+from swh.auth.keycloak import ExpiredSignatureError, KeycloakError
 
 
 def _authenticate_user(request_factory):
@@ -123,18 +125,43 @@ def test_oidc_code_pkce_auth_backend_refresh_token_failure(
     """
     Checks access token renewal failure using refresh token.
     """
+
+    # authenticate user
+    user = _authenticate_user(request_factory)
+    assert user is not None
+    # OIDC profile should be in cache
+    cache_key = oidc_profile_cache_key(keycloak_oidc, user.id)
+    assert cache.get(cache_key) is not None
+
+    # simulate terminated OIDC session
     keycloak_oidc.decode_token = Mock()
     keycloak_oidc.decode_token.side_effect = ExpiredSignatureError(
         "access token token has expired"
     )
-    keycloak_oidc.refresh_token.side_effect = Exception("OIDC session has expired")
 
-    user = _authenticate_user(request_factory)
+    kc_error_dict = {
+        "error": "invalid_grant",
+        "error_description": "Session not active",
+    }
+    keycloak_oidc.refresh_token.side_effect = KeycloakError(
+        error_message=json.dumps(kc_error_dict).encode(), response_code=400
+    )
 
+    backend_path = "swh.auth.django.backends.OIDCAuthorizationCodePKCEBackend"
+    assert user.backend == backend_path
+    backend_idx = settings.AUTHENTICATION_BACKENDS.index(backend_path)
+
+    # try to authenticate user again from its id and cached OIDC profile
+    user = get_backends()[backend_idx].get_user(user.id)
+
+    # it should have tried to refresh token
     oidc_profile = keycloak_oidc.login()
     keycloak_oidc.refresh_token.assert_called_with(oidc_profile["refresh_token"])
 
+    # authentication failed
     assert user is None
+    # invalid OIDC profile should have been removed from cache
+    assert cache.get(cache_key) is None
 
 
 @pytest.mark.django_db
