@@ -121,6 +121,7 @@ class OIDCAuthorizationCodePKCEBackend:
                 if error_msg == "invalid_grant: Session not active":
                     # user session no longer active, remove oidc profile from cache
                     cache.delete(cache_key)
+                sentry_sdk.capture_exception(ke)
                 return None
             except Exception as e:
                 sentry_sdk.capture_exception(e)
