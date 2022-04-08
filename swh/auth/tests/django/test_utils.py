@@ -99,7 +99,9 @@ def test_oidc_user_from_profile(keycloak_oidc):
 
 
 @override_settings(
-    SWH_AUTH_SERVER_URL=None, SWH_AUTH_REALM_NAME=None, SWH_AUTH_CLIENT_ID=None,
+    SWH_AUTH_SERVER_URL=None,
+    SWH_AUTH_REALM_NAME=None,
+    SWH_AUTH_CLIENT_ID=None,
 )
 def test_keycloak_oidc_client_missing_django_settings():
 
