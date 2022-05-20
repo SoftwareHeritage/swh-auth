@@ -1,4 +1,4 @@
-# Copyright (C) 2021  The Software Heritage developers
+# Copyright (C) 2021-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -22,8 +22,10 @@ from swh.auth.tests.sample_data import (
     SERVER_URL,
 )
 
+pytestmark = pytest.mark.django_db
 
-def _check_user(user, is_staff=False, permissions=set()):
+
+def _check_user(user, is_staff=False, permissions=set(), groups=set()):
     assert user.id > 0
     assert user.username == DECODED_TOKEN["preferred_username"]
     assert user.password == ""
@@ -31,7 +33,9 @@ def _check_user(user, is_staff=False, permissions=set()):
     assert user.last_name == DECODED_TOKEN["family_name"]
     assert user.email == DECODED_TOKEN["email"]
     assert user.is_staff == is_staff
+    assert {group.name for group in user.groups.all()} == groups
     assert user.permissions == permissions
+    assert all(user.has_perm(perm) for perm in permissions)
     assert user.sub == DECODED_TOKEN["sub"]
 
     date_now = datetime.now()
@@ -71,7 +75,12 @@ def test_oidc_user_with_permissions_from_decoded_token():
 
     user = oidc_user_from_decoded_token(decoded_token, client_id=CLIENT_ID)
 
-    _check_user(user, is_staff=True, permissions={"swh.ambassador", "read-api"})
+    _check_user(
+        user,
+        is_staff=True,
+        permissions={"swh.ambassador", "read-api"},
+        groups={group_name.lstrip("/") for group_name in decoded_token["groups"]},
+    )
 
 
 @pytest.mark.parametrize(
