@@ -116,9 +116,7 @@ def auth_config_path(tmp_path, monkeypatch, auth_config):
 
 
 def test_auth_KeycloakOpenIDConnect_from_config(auth_config):
-    """Instantiating keycloak client out of configuration dict is possible
-
-     """
+    """Instantiating keycloak client out of configuration dict is possible"""
     client = KeycloakOpenIDConnect.from_config(**auth_config)
 
     assert client.server_url == auth_config["keycloak"]["server_url"]
@@ -127,9 +125,7 @@ def test_auth_KeycloakOpenIDConnect_from_config(auth_config):
 
 
 def test_auth_KeycloakOpenIDConnect_from_configfile(auth_config_path, monkeypatch):
-    """Instantiating keycloak client out of environment variable is possible
-
-     """
+    """Instantiating keycloak client out of environment variable is possible"""
     client = KeycloakOpenIDConnect.from_configfile()
 
     auth_config = read(auth_config_path)
@@ -145,7 +141,7 @@ def test_auth_KeycloakOpenIDConnect_from_configfile_override(
     """Instantiating keycloak client out of environment variable is possible
     And caller can override the configuration  at calling
 
-     """
+    """
     client = KeycloakOpenIDConnect.from_configfile(client_id="foobar")
 
     auth_config = read(auth_config_path)

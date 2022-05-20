@@ -59,8 +59,7 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         user_info: Dict = USER_INFO,
         raw_realm_public_key: str = RAW_REALM_PUBLIC_KEY,
     ):
-        """Constructor
-        """
+        """Constructor"""
         super().__init__(
             server_url=server_url, realm_name=realm_name, client_id=client_id
         )
@@ -182,7 +181,7 @@ def keycloak_oidc_factory(
     raw_realm_public_key: str = RAW_REALM_PUBLIC_KEY,
 ):
     """Keycloak mock fixture factory. Report to
-       :py:class:`swh.auth.pytest_plugin.KeycloackOpenIDConnectMock` docstring.
+    :py:class:`swh.auth.pytest_plugin.KeycloackOpenIDConnectMock` docstring.
 
     """
 
@@ -213,7 +212,9 @@ keycloak_mock_factory = keycloak_oidc_factory
 # (cf. test_keycloak.py, test_utils.py, django related tests)
 # or external modules using that pytest plugin
 _keycloak_oidc = keycloak_oidc_factory(
-    server_url=SERVER_URL, realm_name=REALM_NAME, client_id=CLIENT_ID,
+    server_url=SERVER_URL,
+    realm_name=REALM_NAME,
+    client_id=CLIENT_ID,
 )
 
 

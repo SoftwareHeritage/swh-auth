@@ -41,7 +41,9 @@ class KeycloakOpenIDConnect:
                 retrieved if not provided)
         """
         self._keycloak = KeycloakOpenID(
-            server_url=server_url, client_id=client_id, realm_name=realm_name,
+            server_url=server_url,
+            client_id=client_id,
+            realm_name=realm_name,
         )
         self.server_url = server_url
         self.realm_public_key = realm_public_key
@@ -230,9 +232,7 @@ class KeycloakOpenIDConnect:
 
 
 def keycloak_error_message(keycloak_error: KeycloakError) -> str:
-    """Transform a keycloak exception into an error message.
-
-    """
+    """Transform a keycloak exception into an error message."""
     try:
         # keycloak error wrapped in a JSON document
         msg_dict = json.loads(keycloak_error.error_message.decode())

@@ -28,7 +28,10 @@ MIDDLEWARE = [
 ROOT_URLCONF = "swh.auth.tests.django.app.apptest.urls"
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "swh-auth-test-db",}
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "swh-auth-test-db",
+    }
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
