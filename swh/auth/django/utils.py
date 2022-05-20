@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.http import HttpRequest, QueryDict
 from django.urls import reverse as django_reverse
 
@@ -43,9 +44,17 @@ def oidc_user_from_decoded_token(
         email=decoded_token.get("email", ""),
     )
 
-    # set is_staff user property based on groups
+    # process keycloak groups
+    group_names = set()
     if "groups" in decoded_token:
+        # set is_staff user property based on group membership
         user.is_staff = "/staff" in decoded_token["groups"]
+        for group_name in decoded_token["groups"]:
+            # remove leading slash added by keycloak to group name
+            django_group_name = group_name.lstrip("/")
+            # ensure a corresponding django group exist
+            Group.objects.get_or_create(name=django_group_name)
+            group_names.add(django_group_name)
 
     realm_access = decoded_token.get("realm_access", {})
     permissions = realm_access.get("roles", [])
@@ -58,6 +67,8 @@ def oidc_user_from_decoded_token(
 
     # set user permissions and filter out default keycloak realm roles
     user.permissions = set(permissions) - {"offline_access", "uma_authorization"}
+    # set user groups
+    user.group_names = group_names
 
     # add user sub to custom User proxy model
     user.sub = decoded_token["sub"]

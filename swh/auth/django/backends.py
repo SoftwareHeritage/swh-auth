@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -121,7 +121,8 @@ class OIDCAuthorizationCodePKCEBackend:
                 if error_msg == "invalid_grant: Session not active":
                     # user session no longer active, remove oidc profile from cache
                     cache.delete(cache_key)
-                sentry_sdk.capture_exception(ke)
+                else:
+                    sentry_sdk.capture_exception(ke)
                 return None
             except Exception as e:
                 sentry_sdk.capture_exception(e)
@@ -204,8 +205,7 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
 
             # create Django user
             user = oidc_user_from_decoded_token(decoded_token, oidc_client.client_id)
-        except UnicodeEncodeError as e:
-            sentry_sdk.capture_exception(e)
+        except UnicodeEncodeError:
             raise ValidationError("Invalid bearer token")
         except KeycloakError as ke:
             error_msg = keycloak_error_message(ke)
@@ -217,10 +217,8 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
                     "Bearer token expired after a long period of inactivity; "
                     "please generate a new one."
                 )
-            sentry_sdk.capture_exception(ke)
             raise AuthenticationFailed(error_msg)
         except Exception as e:
-            sentry_sdk.capture_exception(e)
             raise AuthenticationFailed(str(e))
 
         return user, None
