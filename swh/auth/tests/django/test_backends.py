@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -17,6 +17,8 @@ from swh.auth.django.backends import OIDCBearerTokenAuthentication
 from swh.auth.django.models import OIDCUser
 from swh.auth.django.utils import oidc_profile_cache_key, reverse
 from swh.auth.keycloak import ExpiredSignatureError, KeycloakError
+
+pytestmark = pytest.mark.django_db
 
 
 def _authenticate_user(request_factory):
@@ -40,19 +42,22 @@ def _check_authenticated_user(user, decoded_token, keycloak_oidc):
     assert user.last_name == decoded_token["family_name"]
     assert user.email == decoded_token["email"]
     assert user.is_staff == ("/staff" in decoded_token["groups"])
+    assert {group.name for group in user.groups.all()} == {
+        group_name.lstrip("/") for group_name in keycloak_oidc.user_groups
+    }
     assert user.sub == decoded_token["sub"]
     resource_access = decoded_token.get("resource_access", {})
     resource_access_client = resource_access.get(keycloak_oidc.client_id, {})
     assert user.permissions == set(resource_access_client.get("roles", []))
+    assert all(user.has_perm(perm) for perm in resource_access_client.get("roles", []))
 
 
-@pytest.mark.django_db
 def test_oidc_code_pkce_auth_backend_success(keycloak_oidc, request_factory):
     """
     Checks successful login based on OpenID Connect with PKCE extension
     Django authentication backend (login from Web UI).
     """
-    keycloak_oidc.user_groups = ["/staff"]
+    keycloak_oidc.user_groups = ["/staff", "/other_group"]
 
     oidc_profile = keycloak_oidc.login()
     user = _authenticate_user(request_factory)
@@ -80,7 +85,6 @@ def test_oidc_code_pkce_auth_backend_success(keycloak_oidc, request_factory):
     assert get_backends()[backend_idx].get_user(user.id) == user
 
 
-@pytest.mark.django_db
 def test_oidc_code_pkce_auth_backend_failure(keycloak_oidc, request_factory):
     """
     Checks failed login based on OpenID Connect with PKCE extension Django
@@ -93,7 +97,6 @@ def test_oidc_code_pkce_auth_backend_failure(keycloak_oidc, request_factory):
     assert user is None
 
 
-@pytest.mark.django_db
 def test_oidc_code_pkce_auth_backend_refresh_token_success(
     keycloak_oidc, request_factory
 ):
@@ -118,7 +121,6 @@ def test_oidc_code_pkce_auth_backend_refresh_token_success(
     assert user is not None
 
 
-@pytest.mark.django_db
 def test_oidc_code_pkce_auth_backend_refresh_token_failure(
     keycloak_oidc, request_factory
 ):
@@ -164,7 +166,6 @@ def test_oidc_code_pkce_auth_backend_refresh_token_failure(
     assert cache.get(cache_key) is None
 
 
-@pytest.mark.django_db
 def test_oidc_code_pkce_auth_backend_permissions(keycloak_oidc, request_factory):
     """
     Checks that a permission defined with OpenID Connect is correctly mapped
@@ -183,7 +184,6 @@ def test_oidc_code_pkce_auth_backend_permissions(keycloak_oidc, request_factory)
     assert not user.has_module_perms("foo")
 
 
-@pytest.mark.django_db
 def test_drf_oidc_bearer_token_auth_backend_success(keycloak_oidc, api_request_factory):
     """
     Checks successful login based on OpenID Connect bearer token Django REST
@@ -206,7 +206,6 @@ def test_drf_oidc_bearer_token_auth_backend_success(keycloak_oidc, api_request_f
     assert hasattr(user, "access_token") and user.access_token is None
 
 
-@pytest.mark.django_db
 def test_drf_oidc_bearer_token_auth_backend_failure(keycloak_oidc, api_request_factory):
     """
     Checks failed login based on OpenID Connect bearer token Django REST
@@ -261,7 +260,6 @@ def test_drf_oidc_auth_invalid_or_missing_auth_type(keycloak_oidc, api_request_f
         drf_auth_backend.authenticate(request)
 
 
-@pytest.mark.django_db
 def test_drf_oidc_bearer_token_auth_backend_permissions(
     keycloak_oidc, api_request_factory
 ):

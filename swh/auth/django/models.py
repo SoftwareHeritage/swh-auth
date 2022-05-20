@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -6,7 +6,8 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, Set
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
+from django.db.models import Q
 
 
 class OIDCUser(User):
@@ -35,6 +36,9 @@ class OIDCUser(User):
 
     # User permissions
     permissions: Set[str]
+
+    # User groups
+    group_names: Set[str]
 
     class Meta:
         # TODO: To redefine in subclass of this class
@@ -86,6 +90,17 @@ class OIDCUser(User):
             return True
 
         return any(perm.startswith(app_label) for perm in self.permissions)
+
+    @property
+    def groups(self):
+        """
+        Override django.contrib.auth.models.PermissionsMixin.groups
+        to get groups from OIDC.
+        """
+        search_query = Q()
+        for group_name in self.group_names:
+            search_query = search_query | Q(name=group_name)
+        return Group.objects.filter(search_query)
 
     @property
     def oidc_profile(self) -> Dict[str, Any]:
