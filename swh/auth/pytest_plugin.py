@@ -68,7 +68,7 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         self.realm_permissions = realm_permissions
         self.client_permissions = client_permissions
         self._keycloak.public_key = lambda: raw_realm_public_key
-        self._keycloak.well_know = lambda: {
+        self._keycloak.well_known = lambda: {
             "issuer": f"{self.server_url}realms/{self.realm_name}",
             "authorization_endpoint": (
                 f"{self.server_url}realms/"
@@ -99,6 +99,9 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
                 "protocol/openid-connect/certs"
             ),
         }
+        # for python-keycloak < 1.0.0:
+        self._keycloak.well_know = self._keycloak.well_known
+
         self.set_auth_success(auth_success, oidc_profile, user_info)
 
     def decode_token(self, token):
