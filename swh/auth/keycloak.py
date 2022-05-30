@@ -71,7 +71,11 @@ class KeycloakOpenIDConnect:
         Returns:
             A dictionary filled with OpenID Connect URIS.
         """
-        return self._keycloak.well_know()
+        try:
+            return self._keycloak.well_known()
+        except AttributeError:
+            # python-keycloak < 1.0.0
+            return self._keycloak.well_know()
 
     def authorization_url(self, redirect_uri: str, **extra_params: str) -> str:
         """
