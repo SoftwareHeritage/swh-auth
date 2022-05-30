@@ -1,8 +1,11 @@
-swh-auth (0.6.3-1~swh1~bpo10+1) buster-swh; urgency=medium
+swh-auth (0.6.4-1~swh1) unstable-swh; urgency=medium
 
-  * Rebuild for buster-swh
+  * New upstream release 0.6.4     - (tagged by Valentin Lorentz
+    <vlorentz@softwareheritage.org> on 2022-05-30 14:07:55 +0200)
+  * Upstream changes:     - v0.6.4     - * Add support for python-
+    keycloak >= 1.0.0
 
- -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Fri, 20 May 2022 11:51:35 +0000
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Mon, 30 May 2022 12:11:16 +0000
 
 swh-auth (0.6.3-1~swh1) unstable-swh; urgency=medium
 
