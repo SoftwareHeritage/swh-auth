@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -6,7 +6,6 @@
 from typing import Any, Dict, cast
 import uuid
 
-from django.conf.urls import url
 from django.contrib.auth import authenticate, login, logout
 from django.core.cache import cache
 from django.http import HttpRequest
@@ -16,6 +15,7 @@ from django.http.response import (
     HttpResponseRedirect,
     HttpResponseServerError,
 )
+from django.urls import re_path as url
 
 from swh.auth.django.models import OIDCUser
 from swh.auth.django.utils import keycloak_oidc_client, oidc_profile_cache_key, reverse
