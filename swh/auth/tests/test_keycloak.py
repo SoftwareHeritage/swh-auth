@@ -31,7 +31,9 @@ def test_keycloak_oidc_well_known(keycloak_oidc):
 
 
 def test_keycloak_oidc_authorization_url(keycloak_oidc):
-    actual_auth_uri = keycloak_oidc.authorization_url("http://redirect-uri", foo="bar")
+    actual_auth_uri = keycloak_oidc.authorization_url(
+        "http://redirect-uri", scope="openid", state="some-state", foo="bar"
+    )
 
     expected_auth_url = keycloak_oidc.well_known()["authorization_endpoint"]
     parsed_result = urlparse(actual_auth_uri)
@@ -43,6 +45,8 @@ def test_keycloak_oidc_authorization_url(keycloak_oidc):
         "response_type": ["code"],
         "redirect_uri": ["http://redirect-uri"],
         "foo": ["bar"],
+        "scope": ["openid"],
+        "state": ["some-state"],
     }
 
 
