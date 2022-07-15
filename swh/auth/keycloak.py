@@ -1,11 +1,11 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2022  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
 import json
 from typing import Any, Dict, Optional
-from urllib.parse import urlencode
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 # add ExpiredSignatureError alias to avoid leaking jose import
 # in swh-auth client code
@@ -87,8 +87,17 @@ class KeycloakOpenIDConnect:
                 authorization URL
         """
         auth_url = self._keycloak.auth_url(redirect_uri)
-        if extra_params:
-            auth_url += "&%s" % urlencode(extra_params)
+        # scope and state query parameters are now handled by auth_url method
+        # since python-keycloak 1.8.1,
+        # code below ensures those will be overridden if provided in extra_params
+        # TODO: remove that code and pass scope and state params to auth_url method
+        # once we use python-keycloak >= 1.8.1 in production
+        parsed_auth_url = urlparse(auth_url)
+        auth_url_qs = parse_qs(parsed_auth_url.query)
+        auth_url_qs.update({k: [v] for k, v in extra_params.items()})
+        auth_url = urlunparse(
+            parsed_auth_url._replace(query=urlencode(auth_url_qs, doseq=True))
+        )
         return auth_url
 
     def authorization_code(
