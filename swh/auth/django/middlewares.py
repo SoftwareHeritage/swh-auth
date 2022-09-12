@@ -23,7 +23,7 @@ class OIDCSessionExpiredMiddleware:
 
     The following query parameter will be set for that view:
 
-      * ``next_path``: requested URL before the detection of the session expiration
+      * ``next``: requested URL before the detection of the session expiration
       * ``remote_user``: indicates that the user was previously authenticated with OIDC
 
     """
@@ -61,8 +61,8 @@ class OIDCSessionExpiredMiddleware:
         # At that point, we know that a OIDC user was previously logged in
         # and his session has expired.
         # Redirect to a view specified in django settings.
-        next_path = request.get_full_path()
+        next = request.get_full_path()
         logout_url = reverse(
-            self.redirect_view, query_params={"next_path": next_path, "remote_user": 1}
+            self.redirect_view, query_params={"next": next, "remote_user": 1}
         )
         return HttpResponseRedirect(logout_url)

@@ -75,7 +75,7 @@ class OIDCAuthorizationCodePKCEBackend:
           application views
 
         * once a user is logged in, add an HTML link targeting the ``"oidc-logout"``
-          django view in your application views (a ``next_path`` query parameter
+          django view in your application views (a ``next`` query parameter
           can be used to redirect to a view of choice once the user is logged out)
 
     """
