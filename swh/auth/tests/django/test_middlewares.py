@@ -65,7 +65,5 @@ def test_oidc_session_expired_middleware_enabled(client, keycloak_oidc):
     # should redirect to logout page
     response = client.get(url)
     assert response.status_code == 302
-    silent_refresh_url = reverse(
-        "logout", query_params={"next_path": url, "remote_user": 1}
-    )
+    silent_refresh_url = reverse("logout", query_params={"next": url, "remote_user": 1})
     assert response["location"] == silent_refresh_url
