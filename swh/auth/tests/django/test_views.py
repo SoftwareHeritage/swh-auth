@@ -118,15 +118,15 @@ def test_oidc_logout_view_success(client, keycloak_oidc):
     keycloak_oidc.authorization_code.assert_called()
 
     # user initiates logout
-    next_path = reverse("root")
-    oidc_logout_url = reverse("oidc-logout", query_params={"next_path": next_path})
+    next = reverse("root")
+    oidc_logout_url = reverse("oidc-logout", query_params={"next": next})
 
     # should redirect to logout page
     response = client.get(oidc_logout_url)
     assert response.status_code == 302
 
     request = response.wsgi_request
-    assert response["location"] == next_path
+    assert response["location"] == next
 
     # should have been logged out in Keycloak
     oidc_profile = keycloak_oidc.login()
@@ -176,7 +176,7 @@ def test_oidc_login_complete_view_missing_parameters(client):
         "code_verifier": "",
         "state": str(uuid.uuid4()),
         "redirect_uri": "",
-        "next_path": "",
+        "next": "",
     }
     session.save()
 
@@ -202,7 +202,7 @@ def test_oidc_login_complete_wrong_csrf_token(client, keycloak_oidc):
         "code_verifier": "",
         "state": str(uuid.uuid4()),
         "redirect_uri": "",
-        "next_path": "",
+        "next": "",
     }
     session.save()
 
@@ -233,7 +233,7 @@ def test_oidc_login_complete_wrong_code_verifier(client, keycloak_oidc):
         "code_verifier": "",
         "state": str(uuid.uuid4()),
         "redirect_uri": "",
-        "next_path": "",
+        "next": "",
     }
     session.save()
 

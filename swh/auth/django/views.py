@@ -39,7 +39,7 @@ def oidc_login_view(request: HttpRequest, redirect_uri: str, scope: str = "openi
         "code_verifier": code_verifier,
         "state": state,
         "redirect_uri": redirect_uri,
-        "next_path": request.GET.get("next_path", ""),
+        "next": request.GET.get("next", ""),
     }
 
     authorization_url_params = {
@@ -107,7 +107,7 @@ def oidc_login_complete(request: HttpRequest) -> HttpResponse:
     except Exception as e:
         return HttpResponseServerError(str(e))
 
-    next_path = login_data["next_path"] or request.build_absolute_uri("/")
+    next = login_data["next"] or request.build_absolute_uri("/")
 
     user = authenticate(
         request=request,
@@ -121,7 +121,7 @@ def oidc_login_complete(request: HttpRequest) -> HttpResponse:
 
     login(request, user)
 
-    return HttpResponseRedirect(next_path)
+    return HttpResponseRedirect(next)
 
 
 def oidc_logout(request: HttpRequest) -> HttpResponse:
@@ -142,7 +142,7 @@ def oidc_logout(request: HttpRequest) -> HttpResponse:
         # remove user data from cache
         cache.delete(oidc_profile_cache_key(oidc_client, user.id))
 
-    return HttpResponseRedirect(request.GET.get("next_path", "/"))
+    return HttpResponseRedirect(request.GET.get("next", "/"))
 
 
 urlpatterns = [
