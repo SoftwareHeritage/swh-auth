@@ -91,7 +91,7 @@ dedicated Django views are available in ``swh-auth``:
 
 - ``oidc-login`` (``/oidc/login/`` URL path): initiate authentication flow
 
-- ``oidc-logout`` (``/oidc/logout/`` URL path): terminate OIDC user session, a ``next_path``
+- ``oidc-logout`` (``/oidc/logout/`` URL path): terminate OIDC user session, a ``next``
   query parameter can be used to redirect to a view of choice once a user is logged out
 
 Add ``swh.auth.django.views.urlpatterns`` to your Django application URLs to use them.
@@ -110,7 +110,7 @@ In that case it redirects to a Django view whose name is set in the
 
 The following query parameter will be set for that view:
 
-- ``next_path``: requested URL before the detection of the OIDC session expiration
+- ``next``: requested URL before the detection of the OIDC session expiration
 
 - ``remote_user``: indicates that the user was previously authenticated with OIDC
 
