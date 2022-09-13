@@ -1,3 +1,11 @@
+swh-auth (0.6.7-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.6.7     - (tagged by Antoine Lambert
+    <anlambert@softwareheritage.org> on 2022-09-13 10:48:31 +0200)
+  * Upstream changes:     - version 0.6.7
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Tue, 13 Sep 2022 08:52:55 +0000
+
 swh-auth (0.6.6-1~swh1) unstable-swh; urgency=medium
 
   * New upstream release 0.6.6     - (tagged by Antoine Lambert
