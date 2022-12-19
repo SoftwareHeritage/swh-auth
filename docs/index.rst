@@ -12,7 +12,7 @@ Reference Documentation
    django
 
 
-.. only:: package_doc
+.. only:: standalone_package_doc
 
    Indices and tables
    ------------------
