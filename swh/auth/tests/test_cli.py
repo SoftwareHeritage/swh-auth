@@ -26,7 +26,7 @@ def keycloak_oidc(keycloak_oidc, mocker):
 
 
 def _run_auth_command(command, keycloak_oidc, input=None):
-    server_url = "http://localhost:5080/auth"
+    server_url = "http://keycloak:8080/keycloak/auth/"
     realm_name = "realm-test"
     client_id = "client-test"
     result = runner.invoke(
