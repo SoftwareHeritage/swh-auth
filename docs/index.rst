@@ -10,4 +10,13 @@ Reference Documentation
 
    cli
    django
-   /apidoc/swh.auth
+
+
+.. only:: standalone_package_doc
+
+   Indices and tables
+   ------------------
+
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`
