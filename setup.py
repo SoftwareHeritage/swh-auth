@@ -52,6 +52,7 @@ setup(
     use_scm_version=True,
     extras_require={
         "django": parse_requirements("django"),
+        "starlette": parse_requirements("starlette"),
         "testing": parse_requirements("test"),
     },
     include_package_data=True,

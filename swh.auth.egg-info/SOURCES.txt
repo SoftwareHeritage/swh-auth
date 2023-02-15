@@ -13,6 +13,7 @@ mypy.ini
 pyproject.toml
 pytest.ini
 requirements-django.txt
+requirements-starlette.txt
 requirements-swh.txt
 requirements-test.txt
 requirements.txt
@@ -47,6 +48,8 @@ swh/auth/django/middlewares.py
 swh/auth/django/models.py
 swh/auth/django/utils.py
 swh/auth/django/views.py
+swh/auth/starlette/__init__.py
+swh/auth/starlette/backends.py
 swh/auth/tests/__init__.py
 swh/auth/tests/conftest.py
 swh/auth/tests/sample_data.py
@@ -67,3 +70,5 @@ swh/auth/tests/django/app/apptest/__init__.py
 swh/auth/tests/django/app/apptest/apps.py
 swh/auth/tests/django/app/apptest/settings.py
 swh/auth/tests/django/app/apptest/urls.py
+swh/auth/tests/starlette/__init__.py
+swh/auth/tests/starlette/test_backend.py

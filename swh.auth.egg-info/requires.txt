@@ -8,6 +8,11 @@ django<3
 djangorestframework
 sentry-sdk
 
+[starlette]
+starlette
+httpx
+aiocache
+
 [testing]
 django-stubs
 djangorestframework-stubs
