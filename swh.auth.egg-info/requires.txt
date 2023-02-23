@@ -4,7 +4,7 @@ pyyaml
 swh.core[http]>=0.3
 
 [django]
-django<3
+django
 djangorestframework
 sentry-sdk
 
@@ -23,3 +23,9 @@ requests_mock
 types-click
 types-pytz
 types-pyyaml
+django
+djangorestframework
+sentry-sdk
+starlette
+httpx
+aiocache
