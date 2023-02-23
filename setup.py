@@ -53,7 +53,7 @@ setup(
     extras_require={
         "django": parse_requirements("django"),
         "starlette": parse_requirements("starlette"),
-        "testing": parse_requirements("test"),
+        "testing": parse_requirements("test", "django", "starlette"),
     },
     include_package_data=True,
     entry_points="""
