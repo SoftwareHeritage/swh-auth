@@ -74,8 +74,10 @@ def test_invalid_refresh_token(client, keycloak_oidc):
     assert "Invalid or expired user token" in response.text
 
 
-def test_success_token(client, keycloak_oidc):
-    client.headers = {"Authorization": "Bearer valid-token"}
+@pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
+def test_success_with_tokens(client, keycloak_oidc, token_type):
+    oidc_profile = keycloak_oidc.login()
+    client.headers = {"Authorization": f"Bearer {oidc_profile[token_type]}"}
     response = client.get("/")
 
     assert response.status_code == 200
