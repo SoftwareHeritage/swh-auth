@@ -19,53 +19,59 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 # TODO (T1410): All generic config code should reside in swh.core.config
 DEFAULT_CONFIG_PATH = os.environ.get(
-    "SWH_CONFIG_FILE", os.path.join(click.get_app_dir("swh"), "global.yml")
+    "SWH_AUTH_CONFIG_FILE", os.path.join(click.get_app_dir("swh"), "auth.yml")
 )
 
+# Keycloak OpenID Connect defaults
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "oidc_server_url": "https://auth.softwareheritage.org/auth/",
-    "realm_name": "SoftwareHeritage",
-    "client_id": "swh-web",
-    "bearer_token": None,
+    "keycloak": {
+        "server_url": "https://auth.softwareheritage.org/auth/",
+        "realm_name": "SoftwareHeritage",
+        "client_id": "swh-web",
+    }
 }
 
 
 @swh_cli_group.group(name="auth", context_settings=CONTEXT_SETTINGS)
 @click.option(
     "--oidc-server-url",
-    "oidc_server_url",
-    default=DEFAULT_CONFIG["oidc_server_url"],
+    "--server-url",
+    "server_url",
+    default=f"{DEFAULT_CONFIG['keycloak']['server_url']}",
     help=(
         "URL of OpenID Connect server (default to "
-        '"https://auth.softwareheritage.org/auth/")'
+        f"\"{DEFAULT_CONFIG['keycloak']['server_url']}\")"
     ),
 )
 @click.option(
     "--realm-name",
     "realm_name",
-    default=DEFAULT_CONFIG["realm_name"],
+    default=f"{DEFAULT_CONFIG['keycloak']['realm_name']}",
     help=(
         "Name of the OpenID Connect authentication realm "
-        '(default to "SoftwareHeritage")'
+        f"(default to \"{DEFAULT_CONFIG['keycloak']['realm_name']}\")"
     ),
 )
 @click.option(
     "--client-id",
     "client_id",
-    default=DEFAULT_CONFIG["client_id"],
-    help=("OpenID Connect client identifier in the realm " '(default to "swh-web")'),
+    default=f"{DEFAULT_CONFIG['keycloak']['client_id']}",
+    help=(
+        "OpenID Connect client identifier in the realm "
+        f"(default to \"{DEFAULT_CONFIG['keycloak']['client_id']}\")"
+    ),
 )
 @click.option(
     "-C",
     "--config-file",
     default=None,
     type=click.Path(exists=True, dir_okay=False, path_type=str),
-    help=f"Configuration file (default: {DEFAULT_CONFIG_PATH})",
+    help=f"Path to authentication configuration file (default: {DEFAULT_CONFIG_PATH})",
 )
 @click.pass_context
 def auth(
     ctx: Context,
-    oidc_server_url: str,
+    server_url: str,
     realm_name: str,
     client_id: str,
     config_file: str,
@@ -76,49 +82,41 @@ def auth(
     This CLI eases the retrieval of a bearer token to authenticate
     a user querying Software Heritage Web APIs.
     """
-    import logging
-    from pathlib import Path
-
-    import yaml
-
     from swh.auth.keycloak import KeycloakOpenIDConnect
     from swh.core import config
 
-    if not config_file:
+    # Env var takes precedence on params
+    # Params takes precedence on "auth.yml" configuration file
+    # Configuration file takes precedence on default auth config values
+    # Set auth config to default values
+    cfg = DEFAULT_CONFIG
+
+    # Merge with default auth config file
+    default_cfg_from_file = config.load_named_config("auth", global_conf=False)
+    cfg = config.merge_configs(cfg, default_cfg_from_file)
+    # Merge with user config file if any
+    if config_file:
+        user_cfg_from_file = config.read_raw_config(config_file)
+        cfg = config.merge_configs(cfg, user_cfg_from_file)
+    else:
         config_file = DEFAULT_CONFIG_PATH
-
-    # Missing configuration file
-    if not config.config_exists(config_file):
-        # if not Path(config_file).exists():
-        click.echo(f"The Swh configuration file {config_file} does not exists.")
-        if click.confirm("Do you want to create it?"):
-            Path(config_file).touch()
-            Path(config_file).write_text("swh:\n")
-            with open(config_file, "w") as file:
-                yaml.dump({"swh": {"auth": DEFAULT_CONFIG}}, file)
-                msg = f"Swh configuration file {config_file} successfully created."
-            click.echo(click.style(msg, fg="green"))
-        else:
-            sys.exit(1)
-
-    try:
-        conf = config.read_raw_config(config.config_basepath(config_file))
-        if not conf:
-            raise ValueError(f"Cannot parse configuration file: {config_file}")
-        assert conf["swh"]["auth"]
-        conf = config.merge_configs(DEFAULT_CONFIG, conf["swh"]["auth"])
-    except Exception:
-        logging.warning(
-            "Using default configuration (cannot load custom one)", exc_info=True
-        )
-        conf = DEFAULT_CONFIG
-
+    # Merge with params if any (params load env var too)
     ctx.ensure_object(dict)
-    ctx.obj["oidc_client"] = KeycloakOpenIDConnect(
-        oidc_server_url, realm_name, client_id
-    )
+    params = {}
+    for key in DEFAULT_CONFIG["keycloak"].keys():
+        if key in ctx.params:
+            params[key] = ctx.params[key]
+    if params:
+        cfg = config.merge_configs(cfg, {"keycloak": params})
+
+    assert "keycloak" in cfg
+
     ctx.obj["config_file"] = config_file
-    ctx.obj["config"] = conf
+    ctx.obj["keycloak"] = cfg["keycloak"]
+
+    # Instantiate an OpenId connect client from keycloak auth configuration
+    # The 'keycloak' key is mandatory
+    ctx.obj["oidc_client"] = KeycloakOpenIDConnect.from_config(keycloak=cfg["keycloak"])
 
 
 @auth.command("generate-token")
@@ -157,6 +155,7 @@ def generate_token(ctx: Context, username: str, password):
             username, password, scope="openid offline_access"
         )
         print(oidc_info["refresh_token"])
+        return oidc_info["refresh_token"]
     except KeycloakError as ke:
         print(keycloak_error_message(ke))
         sys.exit(1)
@@ -183,15 +182,28 @@ def revoke_token(ctx: Context, token: str):
         sys.exit(1)
 
 
-@auth.command("set-token")
-@click.argument("token", required=False)
+@auth.command("config")
+@click.option(
+    "--username",
+    "username",
+    default=None,
+    help=("OpenID username"),
+)
+@click.option(
+    "--token",
+    "token",
+    default=None,
+    help=(
+        "A valid OpenId connect token to authenticate to "
+        f"\"{DEFAULT_CONFIG['keycloak']['server_url']}\""
+    ),
+)
 @click.pass_context
-def set_token(ctx: Context, token: str):
-    """
-    Set a bearer token for an OIDC authentication.
+def auth_config(ctx: Context, username: str, token: str):
+    """Guided authentication configuration for Software Heritage web services
 
-    Users will be prompted for their token, then the token will be saved
-    to standard configuration file.
+    If you do not already have an account, create one at
+    "https://archive.softwareheritage.org/"
     """
     from pathlib import Path
 
@@ -199,29 +211,40 @@ def set_token(ctx: Context, token: str):
 
     from swh.auth.keycloak import KeycloakError, keycloak_error_message
 
-    # Check if a token already exists in configuration file and inform the user
-    if (
-        "bearer_token" in ctx.obj["config"]
-        and ctx.obj["config"]["bearer_token"] is not None
-    ):
-        if not click.confirm(
-            "A token entry already exists in your configuration file."
-            "\nDo you want to override it?"
-        ):
-            sys.exit(1)
+    assert "oidc_client" in ctx.obj
+    oidc_client = ctx.obj["oidc_client"]
 
-    if not token:
-        raw_token = click.prompt(text="Fill or Paste your token")
-    else:
+    # params > config
+    # Ensure we get a token
+    raw_token: str = ""
+
+    if token:
+        # Verify the token is valid
         raw_token = token
+    elif "token" in ctx.obj["keycloak"] and ctx.obj["keycloak"]["token"]:
+        # A token entry exists in keycloak auth config object
+        msg = f"A token entry exists in {ctx.obj['config_file']}\n"
+        click.echo(click.style(msg, fg="green"))
+        next_action = click.prompt(
+            text="Would you like to verify it or generate a new one?",
+            type=click.Choice(["verify", "generate"]),
+            default="verify",
+        )
+        if next_action == "verify":
+            raw_token = ctx.obj["keycloak"]["token"]
 
-    bearer_token = raw_token.strip()
+    if not raw_token:
+        if not username:
+            username = click.prompt(text="Username")
+        raw_token = ctx.invoke(generate_token, username=username)
+
+    assert raw_token
+    refresh_token = raw_token.strip()
 
     # Ensure the token is valid by getting user info
     try:
-        oidc_client = ctx.obj["oidc_client"]
-        # userinfo endpoint needs the access_token
-        access_token = oidc_client.refresh_token(refresh_token=bearer_token)[
+        # userinfo endpoint needs an access_token
+        access_token = oidc_client.refresh_token(refresh_token=refresh_token)[
             "access_token"
         ]
         oidc_info = oidc_client.userinfo(access_token=access_token)
@@ -229,17 +252,24 @@ def set_token(ctx: Context, token: str):
             f"Token verification success for username {oidc_info['preferred_username']}"
         )
         click.echo(click.style(msg, fg="green"))
+        # Store the valid token into keycloak auth config object
+        ctx.obj["keycloak"]["token"] = refresh_token
     except KeycloakError as ke:
         msg = keycloak_error_message(ke)
         click.echo(click.style(msg, fg="red"))
         ctx.exit(1)
 
-    # Write the new token into the file.
-    # TODO use ruamel.yaml to preserve comments in config file
-    ctx.obj["config"]["bearer_token"] = bearer_token
-    config_file_path = Path(ctx.obj["config_file"])
-    config_file_path.write_text(yaml.safe_dump({"swh": {"auth": ctx.obj["config"]}}))
+    # Save auth configuration file?
+    if not click.confirm(
+        "Save authentication settings to\n" f"{ctx.obj['config_file']}?"
+    ):
+        sys.exit(1)
 
-    msg = "Token successfully added to configuration file '%s'"
-    msg %= click.format_filename(str(config_file_path))
+    # Save configuration to file
+    config_path = Path(ctx.obj["config_file"])
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump({"keycloak": ctx.obj["keycloak"]}))
+
+    msg = "\nAuthentication configuration file '%s' written successfully"
+    msg %= click.format_filename(str(config_path))
     click.echo(click.style(msg, fg="green"))
