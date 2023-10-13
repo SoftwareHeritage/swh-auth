@@ -14,14 +14,16 @@ runner = CliRunner()
 
 @pytest.fixture()
 def keycloak_oidc(keycloak_oidc, mocker):
-    def _keycloak_oidc(server_url, realm_name, client_id):
-        keycloak_oidc.server_url = server_url
-        keycloak_oidc.realm_name = realm_name
-        keycloak_oidc.client_id = client_id
+    def _keycloak_oidc_from_config(keycloak):
+        keycloak_oidc.server_url = keycloak["server_url"]
+        keycloak_oidc.realm_name = keycloak["realm_name"]
+        keycloak_oidc.client_id = keycloak["client_id"]
         return keycloak_oidc
 
-    keycloak_oidc_client = mocker.patch("swh.auth.keycloak.KeycloakOpenIDConnect")
-    keycloak_oidc_client.side_effect = _keycloak_oidc
+    keycloak_oidc_client_from_config = mocker.patch(
+        "swh.auth.keycloak.KeycloakOpenIDConnect.from_config"
+    )
+    keycloak_oidc_client_from_config.side_effect = _keycloak_oidc_from_config
     return keycloak_oidc
 
 
@@ -74,8 +76,8 @@ def test_auth_generate_token_error(keycloak_oidc, mocker, user_credentials):
     result = _run_auth_command(
         command, keycloak_oidc, input=f"{user_credentials['password']}\n"
     )
-    assert result.exit_code == 1
-    assert result.output[:-1] == "invalid_grant: Invalid user credentials"
+    assert result.exit_code != 0
+    assert "invalid_grant: Invalid user credentials" in result.output
 
 
 def test_auth_remove_token_ok(keycloak_oidc):

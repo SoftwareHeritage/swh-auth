@@ -6,7 +6,7 @@
 from base64 import urlsafe_b64encode
 import hashlib
 import secrets
-from typing import Tuple
+from typing import Any, Dict, Optional, Tuple
 
 
 def gen_oidc_pkce_codes() -> Tuple[str, str]:
@@ -33,3 +33,9 @@ def gen_oidc_pkce_codes() -> Tuple[str, str]:
     code_challenge_str = code_challenge_str.replace("=", "")
 
     return code_verifier_str, code_challenge_str
+
+
+def get_token_from_config(
+    config: Dict[str, Any], realm_name: str, client_id: str
+) -> Optional[str]:
+    return config.get("keycloak_tokens", {}).get(realm_name, {}).get((client_id))
