@@ -233,7 +233,7 @@ def auth_config(ctx: Context, username: str, token: str):
         if not username:
             click.echo(
                 f"A new token will be generated for realm '{kc_config['realm_name']}'"
-                f"and client '{kc_config['client_id']}'"
+                f" and client '{kc_config['client_id']}'"
             )
             username = click.prompt(text="Username")
         else:
@@ -250,6 +250,14 @@ def auth_config(ctx: Context, username: str, token: str):
     try:
         # check if an access token can be generated from the refresh token
         oidc_client.refresh_token(refresh_token=refresh_token)["access_token"]
+        if not username:
+            # A token has been provided but no username, get one through userinfo
+            access_token = oidc_client.refresh_token(refresh_token=refresh_token)[
+                "access_token"
+            ]
+            oidc_info = oidc_client.userinfo(access_token=access_token)
+            username = oidc_info["preferred_username"]
+
         msg = f"Token verification success for username {username}"
         click.echo(click.style(msg, fg="green"))
         # Store the valid token into config object
