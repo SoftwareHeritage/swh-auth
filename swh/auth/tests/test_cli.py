@@ -91,3 +91,17 @@ def test_auth_remove_token_error(keycloak_oidc):
     result = _run_auth_command(command, keycloak_oidc)
     assert result.exit_code == 1
     assert result.output[:-1] == "invalid_grant: Invalid user credentials"
+
+
+def test_auth_generate_token_no_password_prompt_ok(
+    keycloak_oidc, mocker, user_credentials
+):
+    command = [
+        "generate-token",
+        user_credentials["username"],
+        "--password",
+        user_credentials["password"],
+    ]
+    result = _run_auth_command(command, keycloak_oidc)
+    assert result.exit_code == 0
+    assert result.output[:-1] == OIDC_PROFILE["refresh_token"]

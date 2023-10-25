@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: swh.auth
-Version: 0.7.2
+Version: 0.7.3
 Summary: Software Heritage Authentication Utilities
 Home-page: https://forge.softwareheritage.org/source/swh-auth/
 Author: Software Heritage developers
@@ -16,11 +16,37 @@ Classifier: Operating System :: OS Independent
 Classifier: Development Status :: 3 - Alpha
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
-Provides-Extra: django
-Provides-Extra: starlette
-Provides-Extra: testing
 License-File: LICENSE
 License-File: AUTHORS
+Requires-Dist: click
+Requires-Dist: python-keycloak>=0.19.0
+Requires-Dist: pyyaml
+Requires-Dist: swh.core[http]>=0.3
+Provides-Extra: django
+Requires-Dist: django; extra == "django"
+Requires-Dist: djangorestframework; extra == "django"
+Requires-Dist: sentry-sdk; extra == "django"
+Provides-Extra: starlette
+Requires-Dist: starlette; extra == "starlette"
+Requires-Dist: httpx; extra == "starlette"
+Requires-Dist: aiocache; extra == "starlette"
+Provides-Extra: testing
+Requires-Dist: django-stubs; extra == "testing"
+Requires-Dist: djangorestframework-stubs; extra == "testing"
+Requires-Dist: pytest; extra == "testing"
+Requires-Dist: pytest-django; extra == "testing"
+Requires-Dist: pytest-mock; extra == "testing"
+Requires-Dist: requests_mock; extra == "testing"
+Requires-Dist: swh.core[testing]; extra == "testing"
+Requires-Dist: types-click; extra == "testing"
+Requires-Dist: types-pytz; extra == "testing"
+Requires-Dist: types-pyyaml; extra == "testing"
+Requires-Dist: django; extra == "testing"
+Requires-Dist: djangorestframework; extra == "testing"
+Requires-Dist: sentry-sdk; extra == "testing"
+Requires-Dist: starlette; extra == "testing"
+Requires-Dist: httpx; extra == "testing"
+Requires-Dist: aiocache; extra == "testing"
 
 Software Heritage - Authentication
 ==================================
