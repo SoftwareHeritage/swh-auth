@@ -1,3 +1,12 @@
+swh-auth (0.7.3-1~swh1) unstable-swh; urgency=medium
+
+  * New upstream release 0.7.3     - (tagged by Guillaume Samson
+    <guillaume.samson@softwareheritage.org> on 2023-10-24 14:50:47
+    +0200)
+  * Upstream changes:     - cli: Add password option
+
+ -- Software Heritage autobuilder (on jenkins-debian1) <jenkins@jenkins-debian1.internal.softwareheritage.org>  Wed, 25 Oct 2023 11:42:06 +0000
+
 swh-auth (0.7.2-1~swh1) unstable-swh; urgency=medium
 
   * New upstream release 0.7.2     - (tagged by Antoine Lambert
