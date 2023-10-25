@@ -5,12 +5,15 @@
 
 from copy import copy
 from datetime import datetime
+import uuid
 
 from django.test import override_settings
 import pytest
 
 from swh.auth.django.utils import (
+    django_id_to_keycloak_uuid,
     keycloak_oidc_client,
+    keycloak_uuid_to_django_id,
     oidc_user_from_decoded_token,
     oidc_user_from_profile,
 )
@@ -130,3 +133,9 @@ def test_keycloak_oidc_client_parameters_from_django_settings():
     assert kc_oidc_client.server_url == SERVER_URL
     assert kc_oidc_client.realm_name == REALM_NAME
     assert kc_oidc_client.client_id == CLIENT_ID
+
+
+def test_django_id_to_keycloak_uuid():
+    keycloak_uuid = str(uuid.uuid4())
+    django_id = keycloak_uuid_to_django_id(keycloak_uuid)
+    assert django_id_to_keycloak_uuid(django_id) == keycloak_uuid

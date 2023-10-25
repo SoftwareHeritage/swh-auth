@@ -59,8 +59,15 @@ def auth(ctx: Context, oidc_server_url: str, realm_name: str, client_id: str):
 
 @auth.command("generate-token")
 @click.argument("username")
+@click.option(
+    "--password",
+    "-p",
+    default=None,
+    type=str,
+    help="OpenID Connect client password in the realm",
+)
 @click.pass_context
-def generate_token(ctx: Context, username: str):
+def generate_token(ctx: Context, username: str, password):
     """
     Generate a new bearer token for a Web API authentication.
 
@@ -78,7 +85,8 @@ def generate_token(ctx: Context, username: str):
 
     from swh.auth.keycloak import KeycloakError, keycloak_error_message
 
-    password = getpass()
+    if not password:
+        password = getpass()
 
     try:
         oidc_info = ctx.obj["oidc_client"].login(
