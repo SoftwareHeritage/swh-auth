@@ -86,7 +86,6 @@ class BearerTokenAuthBackend(AuthenticationBackend):
     async def authenticate(
         self, conn: HTTPConnection
     ) -> Optional[Tuple[AuthCredentials, SimpleUser]]:
-
         auth_header = conn.headers.get("Authorization")
         if auth_header is None:
             # anonymous user

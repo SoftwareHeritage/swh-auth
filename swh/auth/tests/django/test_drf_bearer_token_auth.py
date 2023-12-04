@@ -130,7 +130,6 @@ def test_drf_oidc_bearer_token_expired_token(keycloak_oidc, api_client):
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh_token}")
 
     for kc_err_msg in ("Offline session not active", "Offline user session not found"):
-
         kc_error_dict = {
             "error": "invalid_grant",
             "error_description": kc_err_msg,

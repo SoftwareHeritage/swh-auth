@@ -83,7 +83,6 @@ class OIDCAuthorizationCodePKCEBackend:
     def authenticate(
         self, request: HttpRequest, code: str, code_verifier: str, redirect_uri: str
     ) -> Optional[OIDCUser]:
-
         user = None
         try:
             oidc_client = keycloak_oidc_client()
@@ -172,7 +171,6 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
                 (f"Invalid or unsupported HTTP authorization" f" type ({auth_type}).")
             )
         try:
-
             oidc_client = keycloak_oidc_client()
 
             # compute a cache key from the token that does not exceed

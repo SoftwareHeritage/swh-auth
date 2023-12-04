@@ -228,7 +228,6 @@ class KeycloakOpenIDConnect:
 
     @classmethod
     def from_configfile(cls, **kwargs: Any) -> "KeycloakOpenIDConnect":
-
         """Instantiate a KeycloakOpenIDConnect class from the configuration loaded from the
         SWH_CONFIG_FILENAME envvar, with potential extra keyword arguments if their
         value is not None.

@@ -116,7 +116,6 @@ def test_oidc_user_from_profile(keycloak_oidc):
     SWH_AUTH_CLIENT_ID=None,
 )
 def test_keycloak_oidc_client_missing_django_settings():
-
     with pytest.raises(ValueError, match="settings are mandatory"):
         keycloak_oidc_client()
 
@@ -127,7 +126,6 @@ def test_keycloak_oidc_client_missing_django_settings():
     SWH_AUTH_CLIENT_ID=CLIENT_ID,
 )
 def test_keycloak_oidc_client_parameters_from_django_settings():
-
     kc_oidc_client = keycloak_oidc_client()
 
     assert kc_oidc_client.server_url == SERVER_URL
