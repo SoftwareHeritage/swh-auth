@@ -1,2 +1,2 @@
 [swh.cli.subcommands]
-auth = swh.auth.cli
+swh.auth = swh.auth.cli
