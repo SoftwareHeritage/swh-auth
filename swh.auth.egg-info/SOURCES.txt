@@ -1,3 +1,4 @@
+.copier-answers.yml
 .git-blame-ignore-revs
 .gitignore
 .pre-commit-config.yaml
@@ -5,7 +6,6 @@ AUTHORS
 CODE_OF_CONDUCT.md
 CONTRIBUTORS
 LICENSE
-MANIFEST.in
 Makefile
 README.rst
 conftest.py
@@ -18,7 +18,6 @@ requirements-swh.txt
 requirements-test.txt
 requirements.txt
 setup.cfg
-setup.py
 tox.ini
 docs/.gitignore
 docs/Makefile
@@ -29,7 +28,6 @@ docs/django.rst
 docs/index.rst
 docs/_static/.placeholder
 docs/_templates/.placeholder
-swh/__init__.py
 swh.auth.egg-info/PKG-INFO
 swh.auth.egg-info/SOURCES.txt
 swh.auth.egg-info/dependency_links.txt
