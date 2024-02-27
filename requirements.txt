@@ -2,5 +2,6 @@
 # should match https://pypi.python.org/pypi names. For the full spec or
 # dependency lines, see https://pip.readthedocs.org/en/1.1/requirements.html
 click
-python-keycloak >= 0.19.0
+python-keycloak >= 0.19.0, <3.9
+python-jose
 pyyaml
