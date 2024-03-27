@@ -1,6 +1,6 @@
 django-stubs
 djangorestframework-stubs
-pytest
+pytest >= 8.1
 pytest-django
 pytest-mock
 requests_mock
