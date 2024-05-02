@@ -275,7 +275,10 @@ def auth_config(ctx: Context, username: str, token: str):
         ctx.fail(keycloak_error_message(ke))
 
     # Save auth configuration file?
+
+    msg = f"Skipping write of authentication configuration file {config_file}"
     if not click.confirm(f"Save authentication settings to {config_file}?"):
+        click.echo(click.style(msg, fg="yellow"))
         ctx.exit(0)
 
     # Save configuration to file
