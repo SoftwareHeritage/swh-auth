@@ -1,15 +1,15 @@
-# Copyright (C) 2020-2022  The Software Heritage developers
+# Copyright (C) 2020-2024  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-# add ExpiredSignatureError alias to avoid leaking jose import
+# add ExpiredSignatureError alias to avoid leaking jwcrypto import
 # in swh-auth client code
-from jose.jwt import ExpiredSignatureError  # noqa
+from jwcrypto.jwt import JWTExpired as ExpiredSignatureError  # noqa
 from keycloak import KeycloakOpenID
 
 # add KeycloakError alias to avoid leaking keycloak import
@@ -152,42 +152,35 @@ class KeycloakOpenIDConnect:
         Request a new access token from Keycloak using a refresh token.
 
         Args:
-            refresh_token: A refresh token provided by Keycloak
+            refresh_token: a refresh token provided by Keycloak
 
         Returns:
-            A dictionary filled with tokens info
+            a dictionary filled with tokens info
         """
         return self._keycloak.refresh_token(refresh_token)
 
     def decode_token(
-        self, token: str, options: Optional[Dict[str, Any]] = None
+        self, token: str, validate: bool = True, **kwargs
     ) -> Dict[str, Any]:
         """
         Try to decode a JWT token.
 
         Args:
-            token: A JWT token to decode
-            options: Options for jose.jwt.decode
+            token: a JWT token to decode
+            validate: whether to validate the token
+            kwargs: additional keyword arguments for jwcrypto's JWT object
 
         Returns:
-            A dictionary filled with decoded token content
+            a dictionary filled with decoded token content
         """
-        if not self.realm_public_key:
-            realm_public_key = self._keycloak.public_key()
-            self.realm_public_key = "-----BEGIN PUBLIC KEY-----\n"
-            self.realm_public_key += realm_public_key
-            self.realm_public_key += "\n-----END PUBLIC KEY-----"
-
-        return self._keycloak.decode_token(
-            token, key=self.realm_public_key, options=options
-        )
+        return self._keycloak.decode_token(token, validate=validate, **kwargs)
 
     def logout(self, refresh_token: str) -> None:
         """
         Logout a user by closing its authenticated session.
 
         Args:
-            refresh_token: A refresh token provided by Keycloak
+            refresh_token: a refresh token provided by Keycloak
         """
         self._keycloak.logout(refresh_token)
 
@@ -196,10 +189,10 @@ class KeycloakOpenIDConnect:
         Return user information from its access token.
 
         Args:
-            access_token: An access token provided by Keycloak
+            access_token: an access token provided by Keycloak
 
         Returns:
-            A dictionary fillled with user information
+            a dictionary fillled with user information
         """
         return self._keycloak.userinfo(access_token)
 

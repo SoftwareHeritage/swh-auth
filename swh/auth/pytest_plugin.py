@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021 The Software Heritage developers
+# Copyright (C) 2020-2024 The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -104,14 +104,10 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
 
         self.set_auth_success(auth_success, oidc_profile, user_info)
 
-    def decode_token(self, token):
-        options = {}
-        if self.auth_success:
-            # skip signature expiration and audience checks as we use a static
-            # oidc_profile for the tests with expired tokens in it
-            options["verify_exp"] = False
-            options["verify_aud"] = False
-        decoded = super().decode_token(token, options)
+    def decode_token(self, token, **kwargs):
+        # skip signature expiration and audience checks as we use a static
+        # oidc_profile for the tests with expired tokens in it
+        decoded = super().decode_token(token, validate=False, **kwargs)
         # Merge the user info configured to be part of the decode token
         userinfo = self.userinfo()
         if userinfo is not None:

@@ -1,4 +1,4 @@
-# Copyright (C) 2023 The Software Heritage developers
+# Copyright (C) 2023-2024 The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -8,7 +8,7 @@ import hashlib
 from typing import Any, Dict, Optional, Tuple
 
 from aiocache.base import BaseCache
-from jose.exceptions import JWTError
+from jwcrypto.common import JWException
 from starlette.authentication import (
     AuthCredentials,
     AuthenticationBackend,
@@ -78,7 +78,7 @@ class BearerTokenAuthBackend(AuthenticationBackend):
             return None
         try:
             decoded_token = self.oidc_client.decode_token(access_token)
-        except (KeycloakError, UnicodeEncodeError, ExpiredSignatureError):
+        except (KeycloakError, UnicodeEncodeError, ExpiredSignatureError, ValueError):
             # token is eitehr too old or an invalid one
             decoded_token = None
         return decoded_token
@@ -98,9 +98,8 @@ class BearerTokenAuthBackend(AuthenticationBackend):
             decoded_token = self._decode_token(token)
             if not decoded_token:
                 raise AuthenticationError("Access token failed to be decoded")
-        except JWTError:
+        except JWException:
             # token is a refresh one so backend handles access token renewal
-
             # get the cache key
             cache_key = self._get_token_cache_key(token)
             # read access token from the cache

@@ -1,9 +1,10 @@
-# Copyright (C) 2023 The Software Heritage developers
+# Copyright (C) 2023-2024 The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
 
 from aiocache import Cache
+from jwcrypto.jws import InvalidJWSSignature
 import pytest
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -13,7 +14,7 @@ from starlette.routing import Route
 from starlette.testclient import TestClient
 
 from swh.auth.starlette import backends
-from swh.auth.tests.sample_data import USER_INFO
+from swh.auth.tests.sample_data import DECODED_TOKEN, USER_INFO
 
 
 @pytest.fixture
@@ -71,12 +72,21 @@ def test_invalid_refresh_token(client, keycloak_oidc):
     client.headers = {"Authorization": "Bearer invalid-valid-token"}
     response = client.get("/")
     assert response.status_code == 400
-    assert "Invalid or expired user token" in response.text
+    assert "Access token failed to be decoded" in response.text
 
 
 @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
-def test_success_with_tokens(client, keycloak_oidc, token_type):
+def test_success_with_tokens(client, keycloak_oidc, mocker, token_type):
     oidc_profile = keycloak_oidc.login()
+    if token_type == "refresh_token":
+        # simulate invalid decoding of refresh token then valid decoding of
+        # new access token as JWT validation is disabled in keycloak_oidc fixture
+        # due to the use of expired tokens
+        mocker.patch.object(
+            keycloak_oidc,
+            "decode_token",
+            side_effect=[InvalidJWSSignature(), DECODED_TOKEN],
+        )
     client.headers = {"Authorization": f"Bearer {oidc_profile[token_type]}"}
     response = client.get("/")
 
