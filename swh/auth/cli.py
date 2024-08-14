@@ -7,6 +7,7 @@
 # control
 
 from copy import deepcopy
+import difflib
 import os
 import sys
 from typing import Any, Dict, Optional
@@ -277,9 +278,15 @@ def auth_config(ctx: Context, username: str, token: str):
         ctx.fail(keycloak_error_message(ke))
 
     # Save auth configuration file?
-
     if old_cfg == cfg:
         click.echo("No changes were made to the configuration")
+    else:
+        before = yaml.safe_dump(old_cfg).splitlines()
+        after = yaml.safe_dump(cfg).splitlines()
+        diff = "\n".join(
+            difflib.unified_diff(before, after, fromfile="before", tofile="after")
+        )
+        click.echo(f"Changes made:\n{diff}")
     msg = f"Skipping write of authentication configuration file {config_file}"
     if old_cfg == cfg or not click.confirm(
         f"Save authentication settings to {config_file}?"
