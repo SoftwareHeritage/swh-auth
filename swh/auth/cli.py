@@ -6,6 +6,7 @@
 # WARNING: do not import unnecessary things here to keep cli startup time under
 # control
 
+from copy import deepcopy
 import os
 import sys
 from typing import Any, Dict, Optional
@@ -203,6 +204,7 @@ def auth_config(ctx: Context, username: str, token: str):
     from swh.core import config
 
     cfg = ctx.obj["config"]
+    old_cfg = deepcopy(cfg)
     config_file = ctx.obj["config_file"]
     kc_config = cfg["keycloak"]
     oidc_client = ctx.obj["oidc_client"]
@@ -276,8 +278,12 @@ def auth_config(ctx: Context, username: str, token: str):
 
     # Save auth configuration file?
 
+    if old_cfg == cfg:
+        click.echo("No changes were made to the configuration")
     msg = f"Skipping write of authentication configuration file {config_file}"
-    if not click.confirm(f"Save authentication settings to {config_file}?"):
+    if old_cfg == cfg or not click.confirm(
+        f"Save authentication settings to {config_file}?"
+    ):
         click.echo(click.style(msg, fg="yellow"))
         ctx.exit(0)
 
