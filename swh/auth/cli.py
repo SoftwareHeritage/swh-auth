@@ -289,7 +289,7 @@ def auth_config(ctx: Context, username: str, token: str):
         click.echo(f"Changes made:\n{diff}")
     msg = f"Skipping write of authentication configuration file {config_file}"
     if old_cfg == cfg or not click.confirm(
-        f"Save authentication settings to {config_file}?"
+        f"Save authentication settings to {config_file}?", default=True
     ):
         click.echo(click.style(msg, fg="yellow"))
         ctx.exit(0)
