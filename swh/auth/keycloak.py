@@ -192,7 +192,7 @@ class KeycloakOpenIDConnect:
             access_token: an access token provided by Keycloak
 
         Returns:
-            a dictionary fillled with user information
+            a dictionary filled with user information
         """
         return self._keycloak.userinfo(access_token)
 
