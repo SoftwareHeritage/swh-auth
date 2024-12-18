@@ -62,8 +62,12 @@ def test_oidc_session_expired_middleware_enabled(client, keycloak_oidc):
     # simulate OIDC session expiration
     cache.delete(oidc_profile_cache_key(keycloak_oidc, response.wsgi_request.user.id))
 
-    # should redirect to logout page
+    # should redirect to logout page once when session expiration is detected
     response = client.get(url)
     assert response.status_code == 302
     silent_refresh_url = reverse("logout", query_params={"next": url, "remote_user": 1})
     assert response["location"] == silent_refresh_url
+
+    # next HTTP GET request should return to anonymous browse mode
+    response = client.get(url)
+    assert response.status_code == 200

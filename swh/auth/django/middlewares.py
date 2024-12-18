@@ -59,7 +59,12 @@ class OIDCSessionExpiredMiddleware:
             return self.get_response(request)
 
         # At that point, we know that a OIDC user was previously logged in
-        # and his session has expired.
+        # and the session has expired.
+
+        # Remove authentication backend name from session to avoid being
+        # redirected to logout page on every subsequent GET requests
+        request.session.pop(BACKEND_SESSION_KEY, None)
+
         # Redirect to a view specified in django settings.
         next = request.get_full_path()
         logout_url = reverse(
