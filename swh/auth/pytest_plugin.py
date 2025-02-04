@@ -67,40 +67,42 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         self.user_groups = user_groups
         self.realm_permissions = realm_permissions
         self.client_permissions = client_permissions
-        self._keycloak.public_key = lambda: raw_realm_public_key
-        self._keycloak.well_known = lambda: {
-            "issuer": f"{self.server_url}realms/{self.realm_name}",
-            "authorization_endpoint": (
-                f"{self.server_url}realms/"
-                f"{self.realm_name}/protocol/"
-                "openid-connect/auth"
-            ),
-            "token_endpoint": (
-                f"{self.server_url}realms/{self.realm_name}/"
-                "protocol/openid-connect/token"
-            ),
-            "token_introspection_endpoint": (
-                f"{self.server_url}realms/"
-                f"{self.realm_name}/protocol/"
-                "openid-connect/token/"
-                "introspect"
-            ),
-            "userinfo_endpoint": (
-                f"{self.server_url}realms/{self.realm_name}/"
-                "protocol/openid-connect/userinfo"
-            ),
-            "end_session_endpoint": (
-                f"{self.server_url}realms/"
-                f"{self.realm_name}/protocol/"
-                "openid-connect/logout"
-            ),
-            "jwks_uri": (
-                f"{self.server_url}realms/{self.realm_name}/"
-                "protocol/openid-connect/certs"
-            ),
-        }
-        # for python-keycloak < 1.0.0:
-        self._keycloak.well_know = self._keycloak.well_known
+        setattr(self._keycloak, "public_key", lambda: raw_realm_public_key)
+        setattr(
+            self._keycloak,
+            "well_known",
+            lambda: {
+                "issuer": f"{self.server_url}realms/{self.realm_name}",
+                "authorization_endpoint": (
+                    f"{self.server_url}realms/"
+                    f"{self.realm_name}/protocol/"
+                    "openid-connect/auth"
+                ),
+                "token_endpoint": (
+                    f"{self.server_url}realms/{self.realm_name}/"
+                    "protocol/openid-connect/token"
+                ),
+                "token_introspection_endpoint": (
+                    f"{self.server_url}realms/"
+                    f"{self.realm_name}/protocol/"
+                    "openid-connect/token/"
+                    "introspect"
+                ),
+                "userinfo_endpoint": (
+                    f"{self.server_url}realms/{self.realm_name}/"
+                    "protocol/openid-connect/userinfo"
+                ),
+                "end_session_endpoint": (
+                    f"{self.server_url}realms/"
+                    f"{self.realm_name}/protocol/"
+                    "openid-connect/logout"
+                ),
+                "jwks_uri": (
+                    f"{self.server_url}realms/{self.realm_name}/"
+                    "protocol/openid-connect/certs"
+                ),
+            },
+        )
 
         self.set_auth_success(auth_success, oidc_profile, user_info)
 
@@ -156,7 +158,7 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
                 "error": "invalid_grant",
                 "error_description": "Invalid user credentials",
             }
-            error_message = json.dumps(error).encode()
+            error_message = json.dumps(error)
             exception = KeycloakError(error_message=error_message, response_code=401)
             self.authorization_code.side_effect = exception
             self.authorization_url.side_effect = exception

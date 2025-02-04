@@ -71,11 +71,8 @@ class KeycloakOpenIDConnect:
         Returns:
             A dictionary filled with OpenID Connect URIS.
         """
-        try:
-            return self._keycloak.well_known()
-        except AttributeError:
-            # python-keycloak < 1.0.0
-            return self._keycloak.well_know()
+
+        return self._keycloak.well_known()
 
     def authorization_url(self, redirect_uri: str, **extra_params: str) -> str:
         """
@@ -101,7 +98,7 @@ class KeycloakOpenIDConnect:
         return auth_url
 
     def authorization_code(
-        self, code: str, redirect_uri: str, **extra_params: str
+        self, code: str, redirect_uri: str, **extra_params
     ) -> Dict[str, Any]:
         """
         Get OpenID Connect authentication tokens using Authorization
@@ -125,7 +122,7 @@ class KeycloakOpenIDConnect:
         )
 
     def login(
-        self, username: str, password: str, scope: str = "openid", **extra_params: str
+        self, username: str, password: str, scope: str = "openid", **extra_params
     ) -> Dict[str, Any]:
         """
         Get OpenID Connect authentication tokens using Direct Access Grant flow.
@@ -240,7 +237,7 @@ def keycloak_error_message(keycloak_error: KeycloakError) -> str:
     """Transform a keycloak exception into an error message."""
     try:
         # keycloak error wrapped in a JSON document
-        msg_dict = json.loads(keycloak_error.error_message.decode())
+        msg_dict = json.loads(keycloak_error.error_message)
         error_msg = msg_dict["error"]
         error_desc = msg_dict.get("error_description")
         if error_desc:
