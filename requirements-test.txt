@@ -6,5 +6,6 @@ pytest-mock
 requests_mock
 swh.core[testing]
 types-click
+types-jwcrypto
 types-pytz
 types-pyyaml
