@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2025  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -93,6 +93,19 @@ def test_drf_oidc_bearer_token_auth_failure(keycloak_oidc, api_client):
     request = response.wsgi_request
 
     assert isinstance(request.user, AnonymousUser)
+
+
+@pytest.mark.django_db
+def test_drf_oidc_bearer_token_auth_internal_failure(api_client, mocker):
+    mocker.patch("swh.auth.django.backends.keycloak_oidc_client").side_effect = (
+        Exception("Can't connect to server")
+    )
+    url = reverse("api-test")
+
+    api_client.credentials(HTTP_AUTHORIZATION="Bearer foo")
+
+    response = api_client.get(url)
+    assert response.status_code == 500
 
 
 def test_drf_oidc_auth_invalid_or_missing_authorization_type(keycloak_oidc, api_client):

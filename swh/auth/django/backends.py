@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022  The Software Heritage developers
+# Copyright (C) 2020-2025  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -11,7 +11,11 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.utils import timezone
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import (
+    APIException,
+    AuthenticationFailed,
+    ValidationError,
+)
 import sentry_sdk
 
 from swh.auth.django.models import OIDCUser
@@ -217,6 +221,6 @@ class OIDCBearerTokenAuthentication(BaseAuthentication):
                 )
             raise AuthenticationFailed(error_msg)
         except Exception as e:
-            raise AuthenticationFailed(str(e))
+            raise APIException(str(e))
 
         return user, None

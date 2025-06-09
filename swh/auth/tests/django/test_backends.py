@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2022  The Software Heritage developers
+# Copyright (C) 2020-2025  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_backends
 from django.core.cache import cache
 import pytest
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import APIException, AuthenticationFailed
 
 from swh.auth.django.backends import OIDCBearerTokenAuthentication
 from swh.auth.django.models import OIDCUser
@@ -233,6 +233,25 @@ def test_drf_oidc_bearer_token_auth_backend_failure(keycloak_oidc, api_request_f
 
     with pytest.raises(AuthenticationFailed):
         drf_auth_backend.authenticate(request)
+
+
+def test_drf_oidc_bearer_token_auth_server_error(api_request_factory, mocker):
+    """Checks error 500 is returned when keycloak client cannot connect to
+    the authentication server.
+    """
+    mocker.patch("swh.auth.django.backends.keycloak_oidc_client").side_effect = (
+        Exception("Can't connect to server")
+    )
+
+    url = reverse("api-test")
+    drf_auth_backend = OIDCBearerTokenAuthentication()
+
+    request = api_request_factory.get(url, HTTP_AUTHORIZATION="Bearer foo")
+
+    with pytest.raises(APIException) as e:
+        drf_auth_backend.authenticate(request)
+
+    assert e.value.status_code == 500
 
 
 def test_drf_oidc_auth_invalid_or_missing_auth_type(keycloak_oidc, api_request_factory):
