@@ -245,4 +245,5 @@ def keycloak_error_message(keycloak_error: KeycloakError) -> str:
         return error_msg
     except Exception:
         # fallback: return error message string
-        return keycloak_error.error_message
+        error_msg = keycloak_error.error_message
+        return error_msg.decode() if isinstance(error_msg, bytes) else error_msg
