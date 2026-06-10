@@ -1,5 +1,12 @@
 #!/usr/bin/env python
+
+# Copyright (C) 2021-2026  The Software Heritage developers
+# See the AUTHORS file at the top-level directory of this distribution
+# License: GNU General Public License version 3, or any later version
+# See top-level LICENSE file for more information
+
 """Django's command-line utility for administrative tasks."""
+
 import os
 import sys
 
