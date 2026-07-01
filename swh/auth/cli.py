@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023  The Software Heritage developers
+# Copyright (C) 2021-2026  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -6,21 +6,21 @@
 # WARNING: do not import unnecessary things here to keep cli startup time under
 # control
 
-from copy import deepcopy
-import difflib
+from __future__ import annotations
+
 import os
-import sys
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import click
-from click.core import Context
 
 from swh.core.cli import swh as swh_cli_group
-from swh.core.config import SWH_GLOBAL_CONFIG
+
+if TYPE_CHECKING:
+    from click.core import Context
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-DEFAULT_CONFIG_PATH = os.path.join(click.get_app_dir("swh"), SWH_GLOBAL_CONFIG)
+DEFAULT_CONFIG_PATH = os.path.join(click.get_app_dir("swh"), "global.yml")
 
 DEFAULT_CONFIG: Dict[str, Any] = {
     "keycloak": {
@@ -163,6 +163,8 @@ def revoke_token(ctx: Context, token: str):
 
     The token is definitely revoked after that operation.
     """
+    import sys
+
     from swh.auth.keycloak import KeycloakError, keycloak_error_message
 
     try:
@@ -196,6 +198,8 @@ def auth_config(ctx: Context, username: str, token: str):
     If you do not already have an account, create one at
     "https://archive.softwareheritage.org/"
     """
+    from copy import deepcopy
+    import difflib
     from pathlib import Path
 
     import yaml
