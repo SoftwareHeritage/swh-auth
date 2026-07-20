@@ -13,12 +13,11 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import click
 
+from swh.core.cli import CONTEXT_SETTINGS, setup_config
 from swh.core.cli import swh as swh_cli_group
 
 if TYPE_CHECKING:
     from click.core import Context
-
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 DEFAULT_CONFIG_PATH = os.path.join(click.get_app_dir("swh"), "global.yml")
 
@@ -85,11 +84,8 @@ def auth(
     from swh.auth.keycloak import KeycloakOpenIDConnect
     from swh.core import config
 
-    # default config
-    cfg = DEFAULT_CONFIG
-
-    # merge config located in config file if any
-    cfg = config.merge_configs(cfg, config.read_raw_config(config_file))
+    setup_config(ctx, config_file)
+    cfg = config.merge_configs(DEFAULT_CONFIG, ctx.obj["config"])
 
     # override config with command parameters if provided
     if "keycloak" not in cfg:
@@ -101,9 +97,10 @@ def auth(
     if client_id is not None:
         cfg["keycloak"]["client_id"] = client_id
 
-    ctx.ensure_object(dict)
-    ctx.obj["config_file"] = config_file
     ctx.obj["config"] = cfg
+    # if config_file has not been set by setup_config() (swh.core too old), fill it
+    if "config_file" not in ctx.obj:
+        ctx.obj["config_file"] = config_file
 
     # Instantiate an OpenId connect client from keycloak auth configuration
     ctx.obj["oidc_client"] = KeycloakOpenIDConnect.from_config(keycloak=cfg["keycloak"])
