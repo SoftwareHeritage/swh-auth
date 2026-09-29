@@ -4,7 +4,7 @@ pytest >= 8.1
 pytest-django
 pytest-mock
 requests_mock
-swh.core[testing]
+swh.core[testing_core]
 types-jwcrypto
 types-pytz
 types-pyyaml
