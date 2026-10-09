@@ -1,13 +1,15 @@
-# Copyright (C) 2020-2021  The Software Heritage developers
+# Copyright (C) 2020-2026  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU General Public License version 3, or any later version
 # See top-level LICENSE file for more information
+
+from urllib.parse import urlparse
 
 from click.testing import CliRunner
 import pytest
 import yaml
 
-from swh.auth.cli import auth
+from swh.auth.cli import DEFAULT_CONFIG, auth
 from swh.auth.tests.sample_data import OIDC_PROFILE, USER_INFO
 
 runner = CliRunner()
@@ -24,8 +26,9 @@ def config_file(monkeypatch, tmp_path):
 @pytest.fixture()
 def keycloak_oidc(keycloak_oidc, mocker):
     def _keycloak_oidc_from_config(keycloak):
-        keycloak_oidc.server_url = keycloak["server_url"]
-        keycloak_oidc.realm_name = keycloak["realm_name"]
+        keycloak_oidc.update_keycloak_configuration(
+            keycloak["server_url"], keycloak["realm_name"]
+        )
         keycloak_oidc.client_id = keycloak["client_id"]
         return keycloak_oidc
 
@@ -37,25 +40,19 @@ def keycloak_oidc(keycloak_oidc, mocker):
 
 
 def _run_auth_command(command, keycloak_oidc, input=None):
-    server_url = "http://keycloak:8080/keycloak/auth/"
-    realm_name = "realm-test"
-    client_id = "client-test"
     result = runner.invoke(
         auth,
         [
             "--oidc-server-url",
-            server_url,
+            keycloak_oidc.server_url,
             "--realm-name",
-            realm_name,
+            keycloak_oidc.realm_name,
             "--client-id",
-            client_id,
+            keycloak_oidc.client_id,
             *command,
         ],
         input=input,
     )
-    assert keycloak_oidc.server_url == server_url
-    assert keycloak_oidc.realm_name == realm_name
-    assert keycloak_oidc.client_id == client_id
     return result
 
 
@@ -64,9 +61,34 @@ def user_credentials():
     return {"username": "foo", "password": "bar"}
 
 
-def test_auth_generate_token_ok(keycloak_oidc, mocker, user_credentials):
+def mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url):
+    redirect_uri = "https://archive.softwareheritage.org/"
+    code = "some-code"
+    login_url = keycloak_oidc.authorization_url(redirect_uri=redirect_uri)
+    login_url_parsed = urlparse(login_url)
+    login_url_no_params = (
+        f"{login_url_parsed.scheme}://{login_url_parsed.netloc}{login_url_parsed.path}"
+    )
+    requests_mock.get(login_url_no_params, text=kc_login_page)
+    requests_mock.post(
+        login_action_url,
+        status_code=302,
+        headers={"Location": f"{redirect_uri}?code={code}"},
+    )
+
+
+def test_auth_generate_token_ok(
+    keycloak_oidc,
+    mocker,
+    user_credentials,
+    requests_mock,
+    kc_login_page,
+    login_action_url,
+):
     mock_getpass = mocker.patch("getpass.getpass")
     mock_getpass.return_value = user_credentials["password"]
+
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
 
     command = ["generate-token", user_credentials["username"]]
     result = _run_auth_command(
@@ -105,8 +127,9 @@ def test_auth_remove_token_error(keycloak_oidc):
 
 
 def test_auth_generate_token_no_password_prompt_ok(
-    keycloak_oidc, mocker, user_credentials
+    keycloak_oidc, user_credentials, requests_mock, kc_login_page, login_action_url
 ):
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
     command = [
         "generate-token",
         user_credentials["username"],
@@ -119,7 +142,13 @@ def test_auth_generate_token_no_password_prompt_ok(
 
 
 def test_auth_config_no_options_no_save_ok(
-    keycloak_oidc, mocker, user_credentials, config_file
+    keycloak_oidc,
+    mocker,
+    user_credentials,
+    config_file,
+    requests_mock,
+    kc_login_page,
+    login_action_url,
 ):
     """Test `auth config` default command (without options).
     Prompt answer 'no' to save config file question.
@@ -129,6 +158,8 @@ def test_auth_config_no_options_no_save_ok(
     """
     mock_getpass = mocker.patch("getpass.getpass")
     mock_getpass.return_value = user_credentials["password"]
+
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
 
     command = ["config"]
     result = _run_auth_command(
@@ -157,7 +188,13 @@ def test_auth_config_no_options_no_save_ok(
 
 
 def test_auth_config_no_options_save_ok(
-    keycloak_oidc, mocker, user_credentials, config_file
+    keycloak_oidc,
+    mocker,
+    user_credentials,
+    config_file,
+    requests_mock,
+    kc_login_page,
+    login_action_url,
 ):
     """Test `auth config` default command (without options).
     Prompt answer 'yes' to save config file question.
@@ -167,6 +204,8 @@ def test_auth_config_no_options_save_ok(
     """
     mock_getpass = mocker.patch("getpass.getpass")
     mock_getpass.return_value = user_credentials["password"]
+
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
 
     command = ["config"]
     result = _run_auth_command(
@@ -264,7 +303,13 @@ def test_auth_config_invalid_password_error(
 
 
 def test_auth_client_id_config_no_options_save_ok(
-    keycloak_oidc, mocker, user_credentials, config_file
+    keycloak_oidc,
+    mocker,
+    user_credentials,
+    config_file,
+    requests_mock,
+    kc_login_page,
+    login_action_url,
 ):
     """Test `auth --client-id myclientid config` command (Client ID option of auth).
     Prompt answer 'yes' to save config file question.
@@ -276,6 +321,14 @@ def test_auth_client_id_config_no_options_save_ok(
     mock_getpass.return_value = user_credentials["password"]
 
     client_id = "myclientid"
+    default_kc_config = DEFAULT_CONFIG["keycloak"]
+    keycloak_oidc.update_keycloak_configuration(
+        default_kc_config["server_url"], default_kc_config["realm_name"]
+    )
+    keycloak_oidc.client_id = client_id
+
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
+
     command = ["config"]
     result = runner.invoke(
         auth,
@@ -351,7 +404,15 @@ def test_auth_config_file_config_ok(
     )
 
 
-def test_auth_config_username_ok(keycloak_oidc, mocker, user_credentials, config_file):
+def test_auth_config_username_ok(
+    keycloak_oidc,
+    mocker,
+    user_credentials,
+    config_file,
+    requests_mock,
+    kc_login_page,
+    login_action_url,
+):
     """Test `auth config` command with `--username` option.
 
     swh auth config --username foo
@@ -359,6 +420,8 @@ def test_auth_config_username_ok(keycloak_oidc, mocker, user_credentials, config
     """
     mock_getpass = mocker.patch("getpass.getpass")
     mock_getpass.return_value = user_credentials["password"]
+
+    mock_auth_requests(keycloak_oidc, requests_mock, kc_login_page, login_action_url)
 
     command = ["config", "--username", user_credentials["username"]]
     result = _run_auth_command(

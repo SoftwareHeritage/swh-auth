@@ -113,15 +113,24 @@ def auth(
     "-p",
     default=None,
     type=str,
-    help="OpenID Connect client password in the realm",
+    help="OpenID Connect password for the user in the realm",
+)
+@click.option(
+    "--redirect-uri",
+    "-r",
+    default="https://archive.softwareheritage.org/",
+    type=str,
+    help="A redirect URI associated to the OpenID Connect client",
 )
 @click.pass_context
-def generate_token(ctx: Context, username: str, password):
+def generate_token(
+    ctx: Context, username: str, password: Optional[str], redirect_uri: str
+):
     """
     Generate a new bearer token for a Web API authentication.
 
-    Login with USERNAME, create a new OpenID Connect session and get
-    bearer token.
+    Login with USERNAME, create a new OpenID Connect session using Authorization
+    Code Flow with PKCE and get bearer token.
 
     Users will be prompted for their password, then the token will be printed
     to standard output.
@@ -138,8 +147,11 @@ def generate_token(ctx: Context, username: str, password):
         password = getpass()
 
     try:
-        oidc_info = ctx.obj["oidc_client"].login(
-            username, password, scope="openid offline_access"
+        oidc_info = ctx.obj["oidc_client"].login_pkce(
+            username,
+            password,
+            redirect_uri=redirect_uri,
+            scope="openid offline_access",
         )
         if "invoked_by_config" in ctx.parent.__dict__:
             return oidc_info["refresh_token"]

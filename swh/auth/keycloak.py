@@ -4,8 +4,10 @@
 # See top-level LICENSE file for more information
 
 import json
+import re
 from typing import Any, Dict
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+import uuid
 
 # add ExpiredSignatureError alias to avoid leaking jwcrypto import
 # in swh-auth client code
@@ -15,7 +17,9 @@ from keycloak import KeycloakOpenID
 # add KeycloakError alias to avoid leaking keycloak import
 # in swh-auth client code
 from keycloak.exceptions import KeycloakError  # noqa
+import requests
 
+from swh.auth.utils import gen_oidc_pkce_codes
 from swh.core.config import load_from_envvar
 
 
@@ -133,6 +137,7 @@ class KeycloakOpenIDConnect:
         Args:
             username: an existing username in the realm
             password: password associated to username
+            scope: OpenID Connect session scope
             extra_params: Extra parameters to add in the authorization request
                 payload.
         """
@@ -143,6 +148,97 @@ class KeycloakOpenIDConnect:
             password=password,
             **extra_params,
         )
+
+    def login_pkce(
+        self,
+        username: str,
+        password: str,
+        redirect_uri: str,
+        scope: str = "openid",
+        **extra_params,
+    ) -> Dict[str, Any]:
+        """
+        Get OpenID Connect authentication tokens using Authorization Code flow with PKCE.
+
+        Raises:
+            KeycloakError in case of authentication failures
+
+        Args:
+            username: an existing username in the realm
+            password: password associated to username
+            redirect_uri: a valid redirection URI associated to the Keycloak client
+            scope: OpenID Connect session scope
+            extra_params: Extra parameters to add in the authorization request
+                payload when asking for JWT tokens.
+        """
+        # use a session as cookies are required
+        with requests.Session() as session:
+
+            # generate login page URL
+            code_verifier, code_challenge = gen_oidc_pkce_codes()
+            authorization_url_params = {
+                "state": str(uuid.uuid4()),
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256",
+                "scope": scope,
+            }
+            auth_url = self.authorization_url(
+                redirect_uri=redirect_uri,
+                **authorization_url_params,
+            )
+
+            # fetch HTML login page
+            response = session.get(auth_url)
+            if not response.ok:
+                raise KeycloakError(
+                    f"Could not fetch login page, {response.reason}",
+                    response_code=response.status_code,
+                    response_body=response.content,
+                )
+
+            # extract login URL
+            login_url_match = re.search(
+                r'^.*"loginAction": "(.+)".*$', response.text, re.MULTILINE
+            )
+            if not login_url_match:
+                raise KeycloakError(
+                    "Could not extract login URL from Keycloak login page",
+                    response_code=response.status_code,
+                    response_body=response.content,
+                )
+            login_url = login_url_match.group(1)
+
+            # login with user credentials to get authorization code
+            response = session.post(
+                login_url,
+                data={"username": username, "password": password},
+                allow_redirects=False,
+            )
+            if not response.ok:
+                raise KeycloakError(
+                    f"Login failed: {response.reason}",
+                    response_code=response.status_code,
+                    response_body=response.content,
+                )
+
+            # extract authorization code from Location header
+            redirect_url = response.headers["Location"]
+            query_params = parse_qs(urlparse(redirect_url).query)
+            if "code" not in query_params:
+                raise KeycloakError(
+                    "Authorization code is missing from login redirect URL",
+                    response_body=redirect_url.encode(),
+                )
+
+            code = query_params["code"][0]
+
+            # fetch JWT tokens using authorization code
+            return self.authorization_code(
+                code=code,
+                redirect_uri=redirect_uri,
+                code_verifier=code_verifier,
+                **extra_params,
+            )
 
     def refresh_token(self, refresh_token: str) -> Dict[str, Any]:
         """

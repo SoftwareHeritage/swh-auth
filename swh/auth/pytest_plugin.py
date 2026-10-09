@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2024  The Software Heritage developers
+# Copyright (C) 2020-2026  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -68,6 +68,13 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
         self.realm_permissions = realm_permissions
         self.client_permissions = client_permissions
         setattr(self._keycloak, "public_key", lambda: raw_realm_public_key)
+        self.update_keycloak_configuration(server_url, realm_name)
+
+        self.set_auth_success(auth_success, oidc_profile, user_info)
+
+    def update_keycloak_configuration(self, server_url, realm_name):
+        self.server_url = server_url
+        self.realm_name = realm_name
         setattr(
             self._keycloak,
             "well_known",
@@ -103,8 +110,6 @@ class KeycloackOpenIDConnectMock(KeycloakOpenIDConnect):
                 ),
             },
         )
-
-        self.set_auth_success(auth_success, oidc_profile, user_info)
 
     def decode_token(self, token, **kwargs):
         # skip signature expiration and audience checks as we use a static

@@ -1,4 +1,4 @@
-# Copyright (C) 2021  The Software Heritage developers
+# Copyright (C) 2021-2026  The Software Heritage developers
 # See the AUTHORS file at the top-level directory of this distribution
 # License: GNU Affero General Public License version 3, or any later version
 # See top-level LICENSE file for more information
@@ -97,6 +97,85 @@ def test_keycloak_oidc_decode_token(keycloak_oidc):
 def test_keycloak_oidc_login(keycloak_oidc):
     actual_response = keycloak_oidc.login("username", "password")
     assert actual_response == OIDC_PROFILE
+
+
+def test_keycloak_oidc_login_pkce_success(
+    keycloak_oidc, mocker, requests_mock, kc_login_page, login_action_url
+):
+    redirect_uri = "https://archive.softwareheritage.org/"
+    code = "some-code"
+    login_url = keycloak_oidc.authorization_url(redirect_uri=redirect_uri)
+    login_url_parsed = urlparse(login_url)
+    login_url_no_params = (
+        f"{login_url_parsed.scheme}://{login_url_parsed.netloc}{login_url_parsed.path}"
+    )
+    requests_mock.get(login_url_no_params, text=kc_login_page)
+    requests_mock.post(
+        login_action_url,
+        status_code=302,
+        headers={"Location": f"{redirect_uri}?code={code}"},
+    )
+    authorization_code = mocker.spy(keycloak_oidc, "authorization_code")
+    assert (
+        keycloak_oidc.login_pkce("username", "password", redirect_uri=redirect_uri)
+        == OIDC_PROFILE
+    )
+    assert authorization_code.mock_calls
+    assert "code" in authorization_code.mock_calls[0].kwargs
+    assert authorization_code.mock_calls[0].kwargs["code"] == code
+
+
+def test_keycloak_oidc_login_pkce_authorization_url_error(keycloak_oidc, requests_mock):
+    redirect_uri = "https://archive.softwareheritage.org/"
+    login_url = keycloak_oidc.authorization_url(redirect_uri=redirect_uri)
+    login_url_parsed = urlparse(login_url)
+    login_url_no_params = (
+        f"{login_url_parsed.scheme}://{login_url_parsed.netloc}{login_url_parsed.path}"
+    )
+    requests_mock.get(login_url_no_params, status_code=500, reason="Server Error")
+
+    with pytest.raises(
+        KeycloakError, match="500: Could not fetch login page, Server Error"
+    ):
+        keycloak_oidc.login_pkce("username", "password", redirect_uri=redirect_uri)
+
+
+def test_keycloak_oidc_login_pkce_no_login_action_url_in_login_page(
+    keycloak_oidc, requests_mock
+):
+    redirect_uri = "https://archive.softwareheritage.org/"
+    login_url = keycloak_oidc.authorization_url(redirect_uri=redirect_uri)
+    login_url_parsed = urlparse(login_url)
+    login_url_no_params = (
+        f"{login_url_parsed.scheme}://{login_url_parsed.netloc}{login_url_parsed.path}"
+    )
+    requests_mock.get(login_url_no_params, text="foo")
+
+    with pytest.raises(
+        KeycloakError, match="Could not extract login URL from Keycloak login page"
+    ):
+        keycloak_oidc.login_pkce("username", "password", redirect_uri=redirect_uri)
+
+
+def test_keycloak_oidc_login_pkce_missing_authorization_code(
+    keycloak_oidc, requests_mock, kc_login_page, login_action_url
+):
+    redirect_uri = "https://archive.softwareheritage.org/"
+    login_url = keycloak_oidc.authorization_url(redirect_uri=redirect_uri)
+    login_url_parsed = urlparse(login_url)
+    login_url_no_params = (
+        f"{login_url_parsed.scheme}://{login_url_parsed.netloc}{login_url_parsed.path}"
+    )
+    requests_mock.get(login_url_no_params, text=kc_login_page)
+    requests_mock.post(
+        login_action_url,
+        status_code=302,
+        headers={"Location": redirect_uri},
+    )
+    with pytest.raises(
+        KeycloakError, match="Authorization code is missing from login redirect URL"
+    ):
+        keycloak_oidc.login_pkce("username", "password", redirect_uri=redirect_uri)
 
 
 @pytest.fixture
