@@ -37,6 +37,7 @@ class KeycloakOpenIDConnect:
         realm_name: str,
         client_id: str,
         realm_public_key: str = "",
+        **kwargs,
     ):
         """
         Args:
@@ -45,11 +46,11 @@ class KeycloakOpenIDConnect:
             client_id: The OpenID Connect client identifier
             realm_public_key: The realm public key (will be dynamically
                 retrieved if not provided)
+            kwargs: extra keyword arguments to pass to :class:`keycloak.KeycloakOpenID`
+                constructor
         """
         self._keycloak = KeycloakOpenID(
-            server_url=server_url,
-            client_id=client_id,
-            realm_name=realm_name,
+            server_url=server_url, client_id=client_id, realm_name=realm_name, **kwargs
         )
         self.server_url = server_url
         self.realm_public_key = realm_public_key
@@ -311,11 +312,7 @@ class KeycloakOpenIDConnect:
 
         """
         cfg = kwargs["keycloak"]
-        return cls(
-            server_url=cfg["server_url"],
-            realm_name=cfg["realm_name"],
-            client_id=cfg["client_id"],
-        )
+        return cls(**cfg)
 
     @classmethod
     def from_configfile(cls, **kwargs: Any) -> KeycloakOpenIDConnect:

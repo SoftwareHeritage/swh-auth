@@ -207,6 +207,15 @@ def test_auth_KeycloakOpenIDConnect_from_config(auth_config):
     assert client.client_id == auth_config["keycloak"]["client_id"]
 
 
+def test_auth_KeycloakOpenIDConnect_from_config_extra_kwargs(auth_config):
+    """Instantiating keycloak client out of configuration dict is possible"""
+
+    auth_config["keycloak"]["client_secret_key"] = "foo"
+    client = KeycloakOpenIDConnect.from_config(**auth_config)
+
+    assert client._keycloak.client_secret_key == "foo"
+
+
 def test_auth_KeycloakOpenIDConnect_from_configfile(auth_config_path, monkeypatch):
     """Instantiating keycloak client out of environment variable is possible"""
     client = KeycloakOpenIDConnect.from_configfile()
