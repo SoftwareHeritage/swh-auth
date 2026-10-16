@@ -11,6 +11,7 @@ import yaml
 
 from swh.auth.cli import DEFAULT_CONFIG, auth
 from swh.auth.tests.sample_data import OIDC_PROFILE, USER_INFO
+from swh.core.cli import swh
 
 runner = CliRunner()
 
@@ -381,9 +382,9 @@ def test_auth_config_file_config_ok(
     """
     config_file.write_text(expected_cfg)
 
-    command = ["config"]
+    command = ["auth", "config"]
     result = runner.invoke(
-        auth,
+        swh,
         [
             "--config-file",
             str(config_file),

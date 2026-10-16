@@ -32,15 +32,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 
 @swh_cli_group.group(name="auth", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "-C",
-    "--config-file",
-    default=DEFAULT_CONFIG_PATH,
-    type=click.Path(dir_okay=False, path_type=str),
-    help="Path to configuration file",
-    envvar="SWH_CONFIG_FILENAME",
-    show_default=True,
-)
-@click.option(
     "--oidc-server-url",
     "-u",
     default=None,
@@ -70,7 +61,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 @click.pass_context
 def auth(
     ctx: Context,
-    config_file: str,
     oidc_server_url: Optional[str] = None,
     realm_name: Optional[str] = None,
     client_id: Optional[str] = None,
@@ -84,7 +74,7 @@ def auth(
     from swh.auth.keycloak import KeycloakOpenIDConnect
     from swh.core import config
 
-    setup_config(ctx, config_file)
+    setup_config(ctx, config_file=None)
     cfg = config.merge_configs(DEFAULT_CONFIG, ctx.obj["config"])
 
     # override config with command parameters if provided
@@ -98,9 +88,9 @@ def auth(
         cfg["keycloak"]["client_id"] = client_id
 
     ctx.obj["config"] = cfg
-    # if config_file has not been set by setup_config() (swh.core too old), fill it
+    # fallback to global config file if none was set
     if "config_file" not in ctx.obj:
-        ctx.obj["config_file"] = config_file
+        ctx.obj["config_file"] = DEFAULT_CONFIG_PATH
 
     # Instantiate an OpenId connect client from keycloak auth configuration
     ctx.obj["oidc_client"] = KeycloakOpenIDConnect.from_config(keycloak=cfg["keycloak"])
